@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>品評表單系統</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+
+<!-- Firebase SDK -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getDatabase, ref, push, onValue, set, remove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+  // =============================================
+  // ★ 請填入你的 Firebase 設定（見下方說明）★
+  // =============================================
+  const firebaseConfig = {
+    apiKey: "AIzaSyBBxnHJ2dElY6fJkkx-o7oHFJJBz7CbeYo",
+    authDomain: "evaluation-survey-form.firebaseapp.com",
+    databaseURL: "https://evaluation-survey-form-default-rtdb.firebaseio.com",
+    projectId: "evaluation-survey-form",
+    storageBucket: "evaluation-survey-form.firebasestorage.app",
+    messagingSenderId: "884166116394",
+    appId: "1:884166116394:web:92a505b03ba5e5ed31ef53"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+  window._db = db;
+  window._dbRef = ref;
+  window._dbPush = push;
+  window._dbOnValue = onValue;
+  window._dbSet = set;
+  window._dbRemove = remove;
+  window._firebaseReady = true;
+  document.dispatchEvent(new Event('firebase-ready'));
+</script>
+
+<style>
+:root {
+  --bg: #FAFAF8;
+  --surface: #FFFFFF;
+  --border: #E8E5DF;
+  --border-strong: #C8C5BE;
+  --text: #1A1A18;
+  --text-muted: #6B6B68;
+  --text-hint: #A8A8A5;
+  --accent: #2D5A3D;
+  --accent-light: #EAF2EC;
+  --accent-text: #1A3D27;
+  --star: #D4920A;
+  --danger: #C0392B;
+  --danger-light: #FBEAE8;
+  --warn: #B8690A;
+  --warn-light: #FEF3E2;
+  --radius: 10px;
+  --radius-sm: 6px;
+  --shadow: 0 1px 3px rgba(0,0,0,.06), 0 4px 12px rgba(0,0,0,.04);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+body {
+  font-family: 'Noto Sans TC', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 15px;
+  line-height: 1.6;
+  min-height: 100vh;
+}
+
+.app {
+  max-width: 520px;
+  margin: 0 auto;
+  padding: 0 0 80px;
+}
+
+/* ── Header ── */
+.header {
+  background: var(--accent);
+  color: #fff;
+  padding: 20px 20px 16px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.header-title { font-size: 16px; font-weight: 700; letter-spacing: .02em; }
+.header-sub { font-size: 12px; opacity: .75; margin-top: 2px; }
+
+/* ── Nav tabs ── */
+.nav {
+  display: flex;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto;
+  scrollbar-width: none;
+  position: sticky;
+  top: 64px;
+  z-index: 99;
+}
+.nav::-webkit-scrollbar { display: none; }
+.nav-btn {
+  flex: 1;
+  min-width: 72px;
+  padding: 12px 8px 10px;
+  border: none;
+  background: none;
+  font-family: inherit;
+  font-size: 12px;
+  color: var(--text-muted);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all .15s;
+  white-space: nowrap;
+}
+.nav-btn.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+  font-weight: 700;
+}
+
+/* ── Content ── */
+.content { padding: 20px 16px; }
+
+.section-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--text-hint);
+  margin-bottom: 10px;
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 12px;
+  box-shadow: var(--shadow);
+}
+
+/* ── Form inputs ── */
+.field { margin-bottom: 14px; }
+.field:last-child { margin-bottom: 0; }
+.field label {
+  display: block;
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 5px;
+  font-weight: 500;
+}
+.field input, .field textarea, .field select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-family: inherit;
+  font-size: 15px;
+  background: var(--bg);
+  color: var(--text);
+  appearance: none;
+  transition: border-color .15s;
+}
+.field input:focus, .field textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+  background: #fff;
+}
+.field textarea { resize: vertical; min-height: 72px; }
+
+/* ── Taste chips ── */
+.chips {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+.chip {
+  padding: 8px 4px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 13px;
+  font-family: inherit;
+  text-align: center;
+  cursor: pointer;
+  color: var(--text-muted);
+  background: var(--bg);
+  transition: all .15s;
+  user-select: none;
+}
+.chip.on {
+  background: var(--accent-light);
+  color: var(--accent-text);
+  border-color: var(--accent);
+  font-weight: 700;
+}
+.chip.red { border-color: #E8A09A; }
+.chip.red.on {
+  background: var(--danger-light);
+  color: var(--danger);
+  border-color: var(--danger);
+}
+
+/* ── Star rating ── */
+.star-block { margin-bottom: 10px; }
+.star-block:last-child { margin-bottom: 0; }
+.star-q {
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+.star-row { display: flex; align-items: center; gap: 6px; }
+.stars { display: flex; gap: 4px; }
+.star {
+  font-size: 28px;
+  cursor: pointer;
+  color: #DDD;
+  transition: color .1s, transform .1s;
+  user-select: none;
+  line-height: 1;
+}
+.star.lit { color: var(--star); }
+.star:active { transform: scale(1.2); }
+.na-btn {
+  font-size: 11px;
+  padding: 4px 9px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  cursor: pointer;
+  color: var(--text-muted);
+  background: none;
+  font-family: inherit;
+  transition: all .15s;
+}
+.na-btn.on { background: var(--border); }
+.note-hint {
+  font-size: 12px;
+  color: var(--text-hint);
+  margin: 6px 0 4px;
+}
+.note-input {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-family: inherit;
+  font-size: 13px;
+  background: var(--bg);
+  color: var(--text);
+  resize: none;
+}
+.note-input:focus { outline: none; border-color: var(--accent); }
+
+.divider { border: none; border-top: 1px solid var(--border); margin: 14px 0; }
+
+/* ── Choice buttons ── */
+.choice-group { display: flex; flex-wrap: wrap; gap: 6px; }
+.choice-btn {
+  padding: 8px 14px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  font-family: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  background: var(--bg);
+  color: var(--text-muted);
+  transition: all .15s;
+}
+.choice-btn.sel {
+  background: var(--accent-light);
+  border-color: var(--accent);
+  color: var(--accent-text);
+  font-weight: 700;
+}
+.choice-btn.red.sel {
+  background: var(--danger-light);
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+/* ── Buttons ── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 12px 20px;
+  border-radius: var(--radius);
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  transition: all .15s;
+}
+.btn-primary { background: var(--accent); color: #fff; width: 100%; }
+.btn-primary:active { opacity: .85; }
+.btn-secondary {
+  background: none;
+  border: 1px solid var(--border-strong);
+  color: var(--text);
+  font-weight: 500;
+}
+.btn-danger { background: var(--danger-light); color: var(--danger); border: 1px solid #E8A09A; font-weight: 500; }
+
+/* ── Page nav ── */
+.page-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 20px;
+  gap: 10px;
+}
+.page-info { font-size: 12px; color: var(--text-hint); text-align: center; }
+.dots { display: flex; gap: 5px; justify-content: center; margin-top: 6px; }
+.dot { width: 6px; height: 6px; border-radius: 50%; background: var(--border-strong); }
+.dot.active { background: var(--accent); }
+
+/* ── Metrics ── */
+.metrics { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-bottom: 14px; }
+.metric {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px 10px;
+  text-align: center;
+}
+.metric-val { font-size: 24px; font-weight: 700; color: var(--accent); }
+.metric-lbl { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+/* ── Bar chart ── */
+.bar-item { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.bar-lbl { font-size: 13px; width: 72px; flex-shrink: 0; color: var(--text-muted); }
+.bar-track { flex: 1; height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; }
+.bar-fill { height: 100%; border-radius: 4px; transition: width .5s; }
+.bar-score { font-size: 12px; width: 26px; text-align: right; color: var(--text-muted); }
+
+/* ── Tags ── */
+.tag {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 20px;
+}
+.tag-ok { background: var(--accent-light); color: var(--accent-text); }
+.tag-bad { background: var(--danger-light); color: var(--danger); }
+.tag-warn { background: var(--warn-light); color: var(--warn); }
+
+/* ── Response cards ── */
+.r-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px;
+  margin-bottom: 8px;
+}
+.r-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
+.r-name { font-weight: 700; font-size: 14px; }
+.r-time { font-size: 11px; color: var(--text-hint); }
+.r-summary { font-size: 13px; color: var(--text-muted); }
+.r-notes { margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--border); font-size: 12px; color: var(--text-muted); }
+.r-note-item { margin-bottom: 3px; }
+
+/* ── PIN overlay ── */
+.overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,.5);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 999;
+  padding: 20px;
+}
+.pin-box {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 28px 24px;
+  width: 100%;
+  max-width: 300px;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0,0,0,.2);
+}
+.pin-title { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+.pin-sub { font-size: 13px; color: var(--text-muted); margin-bottom: 16px; }
+.pin-input {
+  width: 100%;
+  padding: 14px;
+  text-align: center;
+  font-size: 24px;
+  letter-spacing: .3em;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-family: inherit;
+  margin-bottom: 12px;
+  background: var(--bg);
+}
+.pin-error { font-size: 12px; color: var(--danger); margin-bottom: 8px; }
+
+/* ── QR ── */
+.qr-wrap { text-align: center; padding: 8px 0; }
+.qr-img { width: 200px; height: 200px; border-radius: var(--radius); border: 1px solid var(--border); }
+.qr-product { font-size: 17px; font-weight: 700; margin-top: 12px; }
+.qr-meta { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+
+/* ── Notice box ── */
+.notice {
+  background: var(--accent-light);
+  border: 1px solid #B8D4BE;
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  font-size: 13px;
+  color: var(--accent-text);
+  margin-bottom: 12px;
+}
+.notice strong { font-weight: 700; }
+
+/* ── Firebase setup notice ── */
+.setup-notice {
+  background: var(--warn-light);
+  border: 1px solid #F0C070;
+  border-radius: var(--radius-sm);
+  padding: 14px;
+  font-size: 13px;
+  color: #7A4A00;
+  margin-bottom: 16px;
+  line-height: 1.7;
+}
+.setup-notice strong { font-weight: 700; display: block; margin-bottom: 4px; }
+.setup-notice ol { padding-left: 18px; }
+.setup-notice li { margin-bottom: 3px; }
+.setup-notice code { background: rgba(0,0,0,.08); padding: 1px 5px; border-radius: 3px; font-family: monospace; font-size: 12px; }
+
+.empty { text-align: center; padding: 40px 20px; color: var(--text-hint); font-size: 14px; }
+
+.saved-pill {
+  display: inline-block;
+  background: var(--accent-light);
+  color: var(--accent-text);
+  font-size: 12px;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 20px;
+  margin-top: 10px;
+}
+
+@keyframes fadeIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+.content > * { animation: fadeIn .2s ease; }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="header-title" id="h-title">品評表單系統</div>
+    <div class="header-sub" id="h-sub">載入中...</div>
+  </div>
+  <nav class="nav" id="nav"></nav>
+  <div class="content" id="content"></div>
+</div>
+
+<script>
+const TASTES=['鹹','甜','辣','辛/嗆','油','苦','茶','奶','焦','澀','酸','果香','咖啡','香料'];
+const FIXED=['氣味/香氣','口感/酥脆','口感/黏牙'];
+const LS_SETUP='pinpan_setup';
+const LS_RESP='pinpan_responses';
+
+let firebase_ready = false;
+
+let S = {
+  tab: 'setup',
+  setup: {
+    product:'', testDate:'', evalDate:'',
+    enabledTastes:[], showAnomaly:true, pin:'1234'
+  },
+  form: {
+    page:0, name:'', dept:'',
+    scores:{}, notes:{},
+    anomaly:null, overallLike:0,
+    buyIntent:null, finalNote:''
+  },
+  responses: [],
+  pinOK: false, pinErr: false,
+  savedBadge: false
+};
+
+// ── Storage helpers (localStorage fallback) ──
+function saveSetupLocal() {
+  localStorage.setItem(LS_SETUP, JSON.stringify(S.setup));
+}
+function loadSetupLocal() {
+  try { const d=localStorage.getItem(LS_SETUP); if(d) S.setup=JSON.parse(d); } catch(e){}
+}
+function saveRespLocal() {
+  localStorage.setItem(LS_RESP, JSON.stringify(S.responses));
+}
+function loadRespLocal() {
+  try { const d=localStorage.getItem(LS_RESP); if(d) S.responses=JSON.parse(d); } catch(e){}
+}
+
+// Firebase push response
+async function pushResponse(resp) {
+  if (firebase_ready && window._db) {
+    try {
+      const r = window._dbRef(window._db, 'responses');
+      await window._dbPush(r, resp);
+      return true;
+    } catch(e) { console.warn('Firebase write failed', e); }
+  }
+  return false;
+}
+
+// Firebase load responses
+function listenResponses(cb) {
+  if (firebase_ready && window._db) {
+    const r = window._dbRef(window._db, 'responses');
+    window._dbOnValue(r, snap => {
+      const data = snap.val();
+      S.responses = data ? Object.values(data) : [];
+      cb();
+    });
+    return true;
+  }
+  return false;
+}
+
+// ── Setup read ──
+function readSetupFields() {
+  ['product','testDate','evalDate','pin'].forEach(k => {
+    const el = document.getElementById('sf-'+k);
+    if (el && el.value !== '') S.setup[k] = el.value;
+  });
+}
+
+function doSaveSetup() {
+  readSetupFields();
+  saveSetupLocal();
+  S.savedBadge = true;
+  updateHeader();
+  render();
+  setTimeout(()=>{ S.savedBadge=false; render(); }, 2500);
+}
+
+function toggleTaste(t) {
+  readSetupFields();
+  const i = S.setup.enabledTastes.indexOf(t);
+  if (i>=0) S.setup.enabledTastes.splice(i,1);
+  else S.setup.enabledTastes.push(t);
+  render();
+}
+
+function toggleAnomaly() {
+  readSetupFields();
+  S.setup.showAnomaly = !S.setup.showAnomaly;
+  render();
+}
+
+// ── Form ──
+function getPages() {
+  return ['基本資訊','固定評分',...S.setup.enabledTastes.map(t=>t+'評分'),'整體評估'];
+}
+
+function setScore(k,v) {
+  S.form.scores[k] = S.form.scores[k]===v ? 0 : v;
+  render();
+}
+function setNA(k) {
+  S.form.scores[k] = S.form.scores[k]==='N/A' ? 0 : 'N/A';
+  render();
+}
+function setNoteVal(k,v) { S.form.notes[k]=v; }
+function setOverall(v) { S.form.overallLike = S.form.overallLike===v?0:v; render(); }
+function setAnomaly(v) { S.form.anomaly = S.form.anomaly===v?null:v; render(); }
+function setIntent(v) { S.form.buyIntent = S.form.buyIntent===v?null:v; render(); }
+
+function nextPage() { const p=getPages(); if(S.form.page<p.length-1){S.form.page++;render();window.scrollTo(0,0);} }
+function prevPage() { if(S.form.page>0){S.form.page--;render();window.scrollTo(0,0);} }
+
+async function submitForm() {
+  const resp = {
+    name: S.form.name||'匿名',
+    dept: S.form.dept,
+    scores: {...S.form.scores},
+    notes: {...S.form.notes},
+    anomaly: S.form.anomaly,
+    overallLike: S.form.overallLike,
+    buyIntent: S.form.buyIntent,
+    finalNote: S.form.finalNote,
+    product: S.setup.product,
+    ts: Date.now(),
+    time: new Date().toLocaleString('zh-TW',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'})
+  };
+
+  const pushedToFirebase = await pushResponse(resp);
+  if (!pushedToFirebase) {
+    S.responses.push(resp);
+    saveRespLocal();
+  }
+
+  S.form = {page:0,name:'',dept:'',scores:{},notes:{},anomaly:null,overallLike:0,buyIntent:null,finalNote:''};
+  render();
+  window.scrollTo(0,0);
+
+  const done = document.getElementById('content');
+  done.innerHTML = `<div style="text-align:center;padding:60px 20px">
+    <div style="font-size:48px;margin-bottom:16px">✓</div>
+    <div style="font-size:20px;font-weight:700;color:var(--accent);margin-bottom:8px">品評已送出！</div>
+    <div style="font-size:14px;color:var(--text-muted);margin-bottom:24px">感謝你的參與</div>
+    <button class="btn btn-secondary" onclick="S.tab='form';render()" style="width:auto;padding:10px 24px">再填一份</button>
+  </div>`;
+}
+
+// ── PIN ──
+function verifyPin() {
+  const el = document.getElementById('pin-inp');
+  if (!el) return;
+  if (el.value === S.setup.pin) { S.pinOK=true; S.pinErr=false; }
+  else { S.pinErr=true; }
+  render();
+}
+
+// ── Render helpers ──
+function starBlock(key, label, allowNA) {
+  const sc = S.form.scores[key]||0;
+  const isNA = sc==='N/A';
+  let stars = '';
+  for(let i=1;i<=5;i++) stars += `<span class="star ${!isNA&&sc>=i?'lit':''}" onclick="setScore('${key}',${i})">★</span>`;
+  return `<div class="star-block">
+    <div class="star-q">${label}</div>
+    <div class="star-row">
+      <div class="stars">${stars}</div>
+      ${allowNA?`<button class="na-btn ${isNA?'on':''}" onclick="setNA('${key}')">N/A</button>`:''}
+    </div>
+    <div class="note-hint">意見（選填）</div>
+    <textarea class="note-input" rows="2" placeholder="輸入意見..." oninput="setNoteVal('${key}',this.value)">${S.form.notes[key]||''}</textarea>
+  </div>`;
+}
+
+// ── Tab renders ──
+function renderSetup() {
+  const s = S.setup;
+  const isConfigured = s.apiKey && s.apiKey !== 'YOUR_API_KEY';
+  return `
+    ${!firebase_ready ? `<div class="setup-notice">
+      <strong>⚠ 需要設定 Firebase 才能多人共用收集資料</strong>
+      <ol>
+        <li>前往 <a href="https://console.firebase.google.com" target="_blank" style="color:var(--warn)">console.firebase.google.com</a> 建立新專案</li>
+        <li>左側選 <code>Realtime Database</code> → 建立資料庫（選 test mode）</li>
+        <li>點專案設定（齒輪）→ 你的應用程式 → 複製 firebaseConfig</li>
+        <li>用文字編輯器打開此 <code>index.html</code>，把第 20 行的設定替換</li>
+        <li>重新上傳到 GitHub Pages 即可</li>
+      </ol>
+      <div style="margin-top:8px">目前使用本機儲存（只存在這台裝置上）</div>
+    </div>` : '<div class="notice">✓ Firebase 已連線，資料將即時同步至雲端</div>'}
+
+    <div class="section-label">產品資訊</div>
+    <div class="card">
+      <div class="field"><label>產品名稱</label><input id="sf-product" type="text" value="${s.product}" placeholder="例：海苔鹹餅乾 #3"></div>
+      <div class="field"><label>試製日期</label><input id="sf-testDate" type="date" value="${s.testDate}"></div>
+      <div class="field"><label>品評日期</label><input id="sf-evalDate" type="date" value="${s.evalDate}"></div>
+      <div class="field"><label>後台 PIN 碼</label><input id="sf-pin" type="password" value="${s.pin}" style="max-width:160px"></div>
+    </div>
+
+    <div class="section-label">本次啟用的滋味項目</div>
+    <div class="card">
+      <div class="chips">
+        ${TASTES.map(t=>`<button class="chip ${s.enabledTastes.includes(t)?'on':''}" onclick="toggleTaste('${t}')">${t}</button>`).join('')}
+      </div>
+      <div style="margin-top:10px;font-size:12px;color:var(--text-hint)">已選 ${s.enabledTastes.length} 項</div>
+    </div>
+
+    <div class="section-label">可選評估項目</div>
+    <div class="card">
+      <button class="chip red ${s.showAnomaly?'on':''}" onclick="toggleAnomaly()" style="width:auto;padding:8px 16px">異味檢測</button>
+      <div style="margin-top:8px;font-size:12px;color:var(--text-hint)">整體喜好、購買意願為固定末端項目</div>
+    </div>
+
+    <button class="btn btn-primary" onclick="doSaveSetup()">✓ 儲存設定</button>
+    ${S.savedBadge?`<div class="saved-pill">✓ 已儲存</div>`:''}
+  `;
+}
+
+function renderForm() {
+  if (!S.setup.product) return `<div class="empty">請先至「品評設定」<br>填入產品資訊並儲存</div>`;
+  const pages = getPages();
+  const p = S.form.page;
+  const isLast = p===pages.length-1;
+  let body = '';
+
+  if (p===0) {
+    body = `<div class="section-label">基本資訊</div>
+    <div class="card">
+      <div class="field"><label>姓名</label><input type="text" value="${S.form.name}" placeholder="您的姓名" oninput="S.form.name=this.value"></div>
+      <div class="field"><label>部門（選填）</label><input type="text" value="${S.form.dept}" placeholder="例：研發部" oninput="S.form.dept=this.value"></div>
+      ${S.setup.product?`<div style="font-size:13px;color:var(--text-muted);margin-top:4px">品評產品：<strong style="color:var(--text)">${S.setup.product}</strong></div>`:''}
+    </div>`;
+  } else if (p===1) {
+    body = `<div class="section-label">固定評分</div><div class="card">
+      ${FIXED.map((q,i)=>(i?'<hr class="divider">':'')+starBlock(q,q,true)).join('')}
+    </div>`;
+  } else if (!isLast) {
+    const taste = S.setup.enabledTastes[p-2];
+    body = `<div class="section-label">${taste} 滋味評分</div><div class="card">${starBlock(taste,taste+'度',false)}</div>`;
+  } else {
+    body = `<div class="section-label">整體評估</div><div class="card">
+      <div class="star-q">整體喜好</div>
+      <div class="stars" style="margin-bottom:16px">${[1,2,3,4,5].map(i=>`<span class="star ${S.form.overallLike>=i?'lit':''}" onclick="setOverall(${i})">★</span>`).join('')}</div>
+      <hr class="divider">
+      <div class="star-q">購買意願</div>
+      <div class="choice-group" style="margin-bottom:16px">
+        ${['一定會買','可能會買','猶豫中','可能不買','不會買'].map(v=>`<button class="choice-btn ${S.form.buyIntent===v?'sel':''}" onclick="setIntent('${v}')">${v}</button>`).join('')}
+      </div>
+      ${S.setup.showAnomaly?`<hr class="divider">
+      <div class="star-q">是否有異味？</div>
+      <div class="choice-group" style="margin-bottom:16px">
+        <button class="choice-btn ${S.form.anomaly===false?'sel':''}" onclick="setAnomaly(false)">✓ 無異味</button>
+        <button class="choice-btn red ${S.form.anomaly===true?'sel':''}" onclick="setAnomaly(true)">✗ 有異味</button>
+      </div>`:''}
+      <hr class="divider">
+      <div class="star-q">整體意見</div>
+      <textarea class="note-input" rows="4" placeholder="整體感受、建議或其他想法..." oninput="S.form.finalNote=this.value" style="margin-top:4px">${S.form.finalNote}</textarea>
+    </div>`;
+  }
+
+  return body + `
+    <div class="page-nav">
+      <button class="btn btn-secondary" onclick="prevPage()" ${p===0?'disabled':''} style="opacity:${p===0?.3:1};flex:1;max-width:120px">← 上一頁</button>
+      <div>
+        <div class="page-info">${p+1} / ${pages.length}</div>
+        <div class="dots">${pages.map((_,i)=>`<div class="dot ${i===p?'active':''}"></div>`).join('')}</div>
+      </div>
+      ${isLast
+        ?`<button class="btn btn-primary" onclick="submitForm()" style="flex:1;max-width:140px">送出品評 ✓</button>`
+        :`<button class="btn btn-primary" onclick="nextPage()" style="flex:1;max-width:120px">下一頁 →</button>`}
+    </div>`;
+}
+
+function renderQR() {
+  const s = S.setup;
+  if (!s.product) return `<div class="empty">請先填好產品資訊並儲存</div>`;
+  const url = window.location.href.split('?')[0].split('#')[0];
+  const qr = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(url)}`;
+  return `
+    <div class="notice"><strong>掃碼後即可直接在手機填寫品評表單</strong><br>填寫完成送出後，資料自動集中到「後台數據」</div>
+    <div class="card qr-wrap">
+      <img class="qr-img" src="${qr}" alt="QR Code">
+      <div class="qr-product">${s.product}</div>
+      ${s.evalDate?`<div class="qr-meta">品評日期：${s.evalDate}</div>`:''}
+      ${s.enabledTastes.length?`<div class="qr-meta">評分項目：${s.enabledTastes.join('、')}</div>`:''}
+      <div style="margin-top:16px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+        <a href="${qr}" download="QRCode.png"><button class="btn btn-secondary" style="width:auto;padding:10px 20px;font-size:13px">↓ 下載圖片</button></a>
+        <button class="btn btn-secondary" onclick="window.print()" style="width:auto;padding:10px 20px;font-size:13px">列印</button>
+      </div>
+    </div>
+    <div class="card" style="font-size:13px;color:var(--text-muted)">
+      <strong style="color:var(--text);display:block;margin-bottom:6px">表單網址</strong>
+      <div style="word-break:break-all;font-family:monospace;font-size:12px;background:var(--bg);padding:8px;border-radius:var(--radius-sm)">${url}</div>
+    </div>`;
+}
+
+function renderDashboard() {
+  if (!S.pinOK) {
+    return `<div class="overlay">
+      <div class="pin-box">
+        <div class="pin-title">後台管理</div>
+        <div class="pin-sub">請輸入 PIN 碼</div>
+        <input class="pin-input" type="password" id="pin-inp" placeholder="••••" maxlength="8">
+        ${S.pinErr?`<div class="pin-error">PIN 碼錯誤，請再試一次</div>`:''}
+        <button class="btn btn-primary" onclick="verifyPin()">確認</button>
+      </div>
+    </div>`;
+  }
+
+  const resp = S.responses;
+  const n = resp.length;
+  if (n===0) return `
+    <div style="text-align:right;margin-bottom:12px">
+      <button class="btn btn-secondary" onclick="refreshDash()" style="width:auto;padding:8px 16px;font-size:13px">↻ 重新整理</button>
+    </div>
+    <div class="empty">尚無品評資料<br><span style="font-size:13px">請品評者掃碼填寫後再查看</span></div>`;
+
+  const allKeys = [...FIXED, ...S.setup.enabledTastes];
+  const avgs = {};
+  allKeys.forEach(k => {
+    const vals = resp.map(r=>r.scores[k]).filter(v=>v&&v!=='N/A'&&v>0);
+    avgs[k] = vals.length ? vals.reduce((a,b)=>a+b,0)/vals.length : null;
+  });
+  const overall = resp.reduce((a,r)=>a+(r.overallLike||0),0)/n;
+  const buyPos = resp.filter(r=>['一定會買','可能會買'].includes(r.buyIntent)).length;
+  const anomalyN = S.setup.showAnomaly ? resp.filter(r=>r.anomaly===true).length : null;
+
+  return `
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <div style="font-size:12px;color:var(--text-hint)">${S.setup.product||''}・即時數據</div>
+      <button class="btn btn-secondary" onclick="refreshDash()" style="width:auto;padding:8px 16px;font-size:13px">↻ 重新整理</button>
+    </div>
+    <div class="metrics">
+      <div class="metric"><div class="metric-val">${n}</div><div class="metric-lbl">品評人數</div></div>
+      <div class="metric"><div class="metric-val">${overall.toFixed(1)}</div><div class="metric-lbl">整體喜好</div></div>
+      <div class="metric"><div class="metric-val">${Math.round(buyPos/n*100)}%</div><div class="metric-lbl">購買正向率</div></div>
+    </div>
+    ${anomalyN!==null?(anomalyN>0?`<div class="tag tag-bad" style="margin-bottom:12px;display:block">⚠ ${anomalyN} 人反映有異味</div>`:`<div class="tag tag-ok" style="margin-bottom:12px;display:block">✓ 無異味反映</div>`):''}
+
+    <div class="section-label">各項評分分析</div>
+    <div class="card">
+      ${allKeys.map(k=>{
+        const avg=avgs[k];
+        if(avg===null) return '';
+        const pct=Math.round((avg/5)*100);
+        const color=avg>=4?'#3A8A50':avg>=3?'#C07010':'#C0392B';
+        return `<div class="bar-item"><div class="bar-lbl">${k}</div><div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${color}"></div></div><div class="bar-score">${avg.toFixed(1)}</div></div>`;
+      }).join('')}
+    </div>
+
+    <div class="section-label">回應明細（${n} 筆）</div>
+    ${resp.slice().reverse().map(r=>{
+      const ne=Object.entries(r.notes||{}).filter(([,v])=>v);
+      return `<div class="r-card">
+        <div class="r-head"><div class="r-name">${r.name}${r.dept?' · '+r.dept:''}</div><div class="r-time">${r.time}</div></div>
+        <div class="r-summary">整體喜好 ${r.overallLike}★ ／ ${r.buyIntent||'未填'}${anomalyN!==null?(r.anomaly===true?' ／ <span class="tag tag-bad">有異味</span>':' ／ <span class="tag tag-ok">無異味</span>'):''}
+        </div>
+        ${ne.length||r.finalNote?`<div class="r-notes">
+          ${ne.map(([k,v])=>`<div class="r-note-item"><strong>${k}：</strong>${v}</div>`).join('')}
+          ${r.finalNote?`<div class="r-note-item"><strong>整體意見：</strong>${r.finalNote}</div>`:''}
+        </div>`:''}
+      </div>`;
+    }).join('')}
+
+    <div style="display:flex;gap:8px;margin-top:16px;flex-wrap:wrap">
+      <button class="btn btn-secondary" onclick="exportCSV()" style="width:auto;padding:10px 18px;font-size:13px">↓ 匯出 CSV</button>
+      <button class="btn btn-danger" onclick="doClear()" style="width:auto;padding:10px 18px;font-size:13px">清除數據</button>
+    </div>`;
+}
+
+async function refreshDash() {
+  loadRespLocal();
+  render();
+}
+
+async function doClear() {
+  if (!confirm('確定清除所有品評數據？此操作無法復原。')) return;
+  S.responses = [];
+  saveRespLocal();
+  if (firebase_ready && window._db) {
+    try { await window._dbRemove(window._dbRef(window._db,'responses')); } catch(e){}
+  }
+  render();
+}
+
+function exportCSV() {
+  const keys = [...FIXED,...S.setup.enabledTastes];
+  const h = ['姓名','部門','時間','整體喜好','購買意願',
+    ...(S.setup.showAnomaly?['是否有異味']:[]),
+    ...keys.map(k=>k+'評分'),...keys.map(k=>k+'意見'),'整體意見'];
+  const rows = S.responses.map(r=>[
+    r.name,r.dept,r.time,r.overallLike,r.buyIntent||'',
+    ...(S.setup.showAnomaly?[r.anomaly===true?'有':r.anomaly===false?'無':'']:[]),
+    ...keys.map(k=>r.scores[k]||''),...keys.map(k=>(r.notes&&r.notes[k])||''),r.finalNote||''
+  ]);
+  const csv=[h,...rows].map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'}));
+  a.download=`品評_${S.setup.product||'data'}.csv`;
+  a.click();
+}
+
+// ── Nav & render ──
+function updateHeader() {
+  document.getElementById('h-title').textContent = S.setup.product || '品評表單系統';
+  document.getElementById('h-sub').textContent = S.setup.product
+    ? (S.setup.evalDate?`品評日期：${S.setup.evalDate}`:'品評系統')
+    : '請先完成品評設定';
+}
+
+function setTab(t) {
+  S.tab=t;
+  if(t==='dashboard') S.pinOK=false;
+  render();
+  window.scrollTo(0,0);
+}
+
+function render() {
+  const tabs=[
+    {id:'setup',label:'⚙ 設定'},
+    {id:'form',label:'✎ 填寫'},
+    {id:'qr',label:'▣ QR碼'},
+    {id:'dashboard',label:'◉ 後台'}
+  ];
+  document.getElementById('nav').innerHTML = tabs.map(t=>
+    `<button class="nav-btn ${S.tab===t.id?'active':''}" onclick="setTab('${t.id}')">${t.label}</button>`
+  ).join('');
+  updateHeader();
+  const c = document.getElementById('content');
+  if(S.tab==='setup') c.innerHTML=renderSetup();
+  else if(S.tab==='form') c.innerHTML=renderForm();
+  else if(S.tab==='qr') c.innerHTML=renderQR();
+  else c.innerHTML=renderDashboard();
+}
+
+// ── Init ──
+document.addEventListener('firebase-ready', () => {
+  firebase_ready = true;
+  listenResponses(()=>{ if(S.tab==='dashboard'&&S.pinOK) render(); });
+  render();
+});
+
+loadSetupLocal();
+loadRespLocal();
+render();
+
+// timeout fallback if Firebase not configured
+setTimeout(()=>{ if(!firebase_ready) render(); }, 1500);
+</script>
+</body>
+</html>
