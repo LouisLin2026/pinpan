@@ -290,6 +290,8 @@ function prevPage(){if(S.form.page>0){S.form.page--;render();scrollTo(0,0);}}
 async function submitForm(){
   const sid=S.sessionId;
   if(!sid){alert('找不到品評資訊，請重新掃碼');return;}
+  if(!S.form.name.trim()){alert('請填寫姓名');return;}
+  if(!S.form.dept.trim()){alert('請選擇或填寫部門');return;}
   function sanitize(obj){const r={};Object.entries(obj||{}).forEach(([k,v])=>{r[safeKey(k)]=v;});return r;}
   const resp={
     name:S.form.name||'匿名',dept:S.form.dept,
@@ -459,9 +461,24 @@ function renderForm(){
   const pages=getPages(),p=S.form.page,isLast=p===pages.length-1;
   let body='';
   if(p===0){
+    const depts=['研發部','品保部','行銷部','產品課'];
+    const isOther=S.form.dept&&!depts.includes(S.form.dept);
     body=`<div class="slabel">基本資訊</div><div class="card">
-      <div class="field"><label>姓名</label><input type="text" value="${S.form.name}" placeholder="您的姓名" oninput="S.form.name=this.value"></div>
-      <div class="field"><label>部門（選填）</label><input type="text" value="${S.form.dept}" placeholder="例：研發部" oninput="S.form.dept=this.value"></div>
+      <div class="field"><label>姓名 *</label><input type="text" value="${S.form.name}" placeholder="您的姓名" oninput="S.form.name=this.value"></div>
+      <div class="field">
+        <label>部門 *</label>
+        <select onchange="
+          if(this.value==='__other__'){S.form.dept='';document.getElementById('dept-other').style.display='block';}
+          else{S.form.dept=this.value;document.getElementById('dept-other').style.display='none';}
+          " style="margin-bottom:6px">
+          <option value="">-- 請選擇部門 --</option>
+          ${depts.map(d=>`<option value="${d}" ${S.form.dept===d?'selected':''}>${d}</option>`).join('')}
+          <option value="__other__" ${isOther?'selected':''}>其他（自行輸入）</option>
+        </select>
+        <input type="text" id="dept-other" placeholder="請輸入部門名稱" value="${isOther?S.form.dept:''}"
+          style="display:${isOther?'block':'none'}"
+          oninput="S.form.dept=this.value">
+      </div>
       <div style="font-size:13px;color:var(--muted);margin-top:4px">品評產品：<strong style="color:var(--text)">${cfg.name}</strong></div>
       ${cfg.catName?`<div style="font-size:12px;color:var(--hint);margin-top:2px">分類：${cfg.catName}${cfg.roundNum?' · 第'+cfg.roundNum+'次':''}</div>`:''}
     </div>`;
