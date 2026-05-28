@@ -5,130 +5,119 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>品評表單系統</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
-
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-  import { getDatabase, ref, push, onValue, set, remove, get } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
-
-  const firebaseConfig = {
-    apiKey: "AIzaSyBBxnHJ2dElY6fJkkx-o7oHFJJBz7CbeYo",
-    authDomain: "evaluation-survey-form.firebaseapp.com",
-    databaseURL: "https://evaluation-survey-form-default-rtdb.firebaseio.com",
-    projectId: "evaluation-survey-form",
-    storageBucket: "evaluation-survey-form.firebasestorage.app",
-    messagingSenderId: "884166116394",
-    appId: "1:884166116394:web:92a505b03ba5e5ed31ef53"
-  };
-
-  const app = initializeApp(firebaseConfig);
-  const db = getDatabase(app);
-  window._db = db;
-  window._ref = ref;
-  window._push = push;
-  window._onValue = onValue;
-  window._set = set;
-  window._remove = remove;
-  window._get = get;
-  document.dispatchEvent(new Event('firebase-ready'));
-</script>
-
 <style>
-:root {
-  --bg:#FAFAF8;--surface:#fff;--border:#E8E5DF;--border-s:#C8C5BE;
-  --text:#1A1A18;--muted:#6B6B68;--hint:#A8A8A5;
-  --accent:#2D5A3D;--accent-l:#EAF2EC;--accent-t:#1A3D27;
-  --star:#D4920A;--danger:#C0392B;--danger-l:#FBEAE8;
-  --warn:#B8690A;--warn-l:#FEF3E2;--radius:10px;--radius-s:6px;
-}
+:root{--bg:#FAFAF8;--surface:#fff;--border:#E8E5DF;--border-s:#C8C5BE;--text:#1A1A18;--muted:#6B6B68;--hint:#A8A8A5;--accent:#2D5A3D;--accent-l:#EAF2EC;--accent-t:#1A3D27;--star:#D4920A;--danger:#C0392B;--danger-l:#FBEAE8;--warn:#B8690A;--warn-l:#FEF3E2;--radius:10px;--radius-s:6px}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text);font-size:15px;line-height:1.6;min-height:100vh}
-.app{max-width:520px;margin:0 auto;padding-bottom:80px}
-.header{background:var(--accent);color:#fff;padding:18px 20px 14px;cursor:default;user-select:none}
+.app{max-width:540px;margin:0 auto;padding-bottom:80px}
+.header{background:var(--accent);color:#fff;padding:16px 20px 12px;cursor:default;user-select:none}
 .h-title{font-size:16px;font-weight:700}
 .h-sub{font-size:12px;opacity:.75;margin-top:2px}
 .nav{display:flex;background:var(--surface);border-bottom:1px solid var(--border);overflow-x:auto;scrollbar-width:none}
 .nav::-webkit-scrollbar{display:none}
-.nav-btn{flex:1;min-width:64px;padding:11px 6px 9px;border:none;background:none;font-family:inherit;font-size:12px;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap}
+.nav-btn{flex:1;min-width:60px;padding:10px 4px 8px;border:none;background:none;font-family:inherit;font-size:11px;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap}
 .nav-btn.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:700}
-.nav-btn.danger{color:var(--danger)}
-.content{padding:18px 16px}
+.nav-btn.red{color:var(--danger)}
+.content{padding:16px}
 .slabel{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--hint);margin-bottom:10px}
-.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,.05)}
-.field{margin-bottom:14px}.field:last-child{margin-bottom:0}
-.field label{display:block;font-size:13px;color:var(--muted);margin-bottom:5px;font-weight:500}
-.field input,.field textarea,.field select{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:var(--radius-s);font-family:inherit;font-size:15px;background:var(--bg);color:var(--text);appearance:none}
-.field input:focus,.field textarea:focus{outline:none;border-color:var(--accent);background:#fff}
-.field textarea{resize:vertical;min-height:72px}
-.chips{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
-.chip{padding:8px 4px;border:1px solid var(--border);border-radius:var(--radius-s);font-size:13px;font-family:inherit;text-align:center;cursor:pointer;color:var(--muted);background:var(--bg);transition:all .15s;user-select:none}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-bottom:10px;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+.field{margin-bottom:12px}.field:last-child{margin-bottom:0}
+.field label{display:block;font-size:13px;color:var(--muted);margin-bottom:4px;font-weight:500}
+.field input,.field textarea,.field select{width:100%;padding:9px 11px;border:1px solid var(--border);border-radius:var(--radius-s);font-family:inherit;font-size:14px;background:var(--bg);color:var(--text)}
+.field input:focus,.field textarea:focus,.field select:focus{outline:none;border-color:var(--accent);background:#fff}
+.field textarea{resize:vertical;min-height:64px}
+.chips{display:grid;grid-template-columns:repeat(4,1fr);gap:5px}
+.chip{padding:7px 4px;border:1px solid var(--border);border-radius:var(--radius-s);font-size:12px;font-family:inherit;text-align:center;cursor:pointer;color:var(--muted);background:var(--bg);user-select:none}
 .chip.on{background:var(--accent-l);color:var(--accent-t);border-color:var(--accent);font-weight:700}
 .chip.red.on{background:var(--danger-l);color:var(--danger);border-color:var(--danger)}
 .star-block{margin-bottom:10px}.star-block:last-child{margin-bottom:0}
-.star-q{font-size:14px;font-weight:500;margin-bottom:8px}
+.star-q{font-size:14px;font-weight:500;margin-bottom:6px}
 .star-row{display:flex;align-items:center;gap:6px}
-.stars{display:flex;gap:4px}
-.star{font-size:28px;cursor:pointer;color:#DDD;transition:color .1s,transform .1s;user-select:none;line-height:1}
-.star.lit{color:var(--star)}.star:active{transform:scale(1.2)}
-.na-btn{font-size:11px;padding:4px 9px;border:1px solid var(--border);border-radius:20px;cursor:pointer;color:var(--muted);background:none;font-family:inherit}
+.stars{display:flex;gap:3px}
+.star{font-size:26px;cursor:pointer;color:#DDD;user-select:none;line-height:1}
+.star.lit{color:var(--star)}
+.na-btn{font-size:11px;padding:3px 8px;border:1px solid var(--border);border-radius:20px;cursor:pointer;color:var(--muted);background:none;font-family:inherit}
 .na-btn.on{background:var(--border)}
-.note-hint{font-size:12px;color:var(--hint);margin:6px 0 4px}
-.note-input{width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:var(--radius-s);font-family:inherit;font-size:13px;background:var(--bg);color:var(--text);resize:none}
+.note-hint{font-size:12px;color:var(--hint);margin:5px 0 3px}
+.note-input{width:100%;padding:7px 10px;border:1px solid var(--border);border-radius:var(--radius-s);font-family:inherit;font-size:13px;background:var(--bg);color:var(--text);resize:none}
 .note-input:focus{outline:none;border-color:var(--accent)}
-.divider{border:none;border-top:1px solid var(--border);margin:14px 0}
-.choice-group{display:flex;flex-wrap:wrap;gap:6px}
-.choice-btn{padding:8px 14px;border:1px solid var(--border);border-radius:20px;font-family:inherit;font-size:13px;cursor:pointer;background:var(--bg);color:var(--muted);transition:all .15s}
+.divider{border:none;border-top:1px solid var(--border);margin:12px 0}
+.choice-group{display:flex;flex-wrap:wrap;gap:5px}
+.choice-btn{padding:7px 12px;border:1px solid var(--border);border-radius:20px;font-family:inherit;font-size:13px;cursor:pointer;background:var(--bg);color:var(--muted)}
 .choice-btn.sel{background:var(--accent-l);border-color:var(--accent);color:var(--accent-t);font-weight:700}
 .choice-btn.red.sel{background:var(--danger-l);border-color:var(--danger);color:var(--danger)}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:12px 20px;border-radius:var(--radius);font-family:inherit;font-size:15px;font-weight:700;cursor:pointer;border:none;transition:all .15s}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:5px;padding:11px 18px;border-radius:var(--radius);font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;border:none}
 .btn-p{background:var(--accent);color:#fff;width:100%}.btn-p:active{opacity:.85}
 .btn-s{background:none;border:1px solid var(--border-s);color:var(--text);font-weight:500}
 .btn-d{background:var(--danger-l);color:var(--danger);border:1px solid #E8A09A;font-weight:500}
-.btn-sm{padding:8px 16px;font-size:13px;font-weight:500}
-.page-nav{display:flex;align-items:center;justify-content:space-between;margin-top:20px;gap:10px}
+.btn-sm{padding:6px 12px;font-size:12px;font-weight:500}
+.btn-xs{padding:4px 9px;font-size:11px;font-weight:500}
+.page-nav{display:flex;align-items:center;justify-content:space-between;margin-top:18px;gap:10px}
 .page-info{font-size:12px;color:var(--hint);text-align:center}
-.dots{display:flex;gap:5px;justify-content:center;margin-top:6px}
-.dot{width:6px;height:6px;border-radius:50%;background:var(--border-s)}
+.dots{display:flex;gap:4px;justify-content:center;margin-top:5px}
+.dot{width:5px;height:5px;border-radius:50%;background:var(--border-s)}
 .dot.active{background:var(--accent)}
-.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
-.metric{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px 10px;text-align:center}
-.metric-val{font-size:22px;font-weight:700;color:var(--accent)}
-.metric-lbl{font-size:11px;color:var(--muted);margin-top:2px}
-.bar-item{display:flex;align-items:center;gap:8px;margin-bottom:8px}
-.bar-lbl{font-size:13px;width:72px;flex-shrink:0;color:var(--muted)}
-.bar-track{flex:1;height:8px;background:var(--border);border-radius:4px;overflow:hidden}
-.bar-fill{height:100%;border-radius:4px;transition:width .5s}
-.bar-score{font-size:12px;width:26px;text-align:right;color:var(--muted)}
-.tag{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px}
+.metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:12px}
+.metric{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:10px 8px;text-align:center}
+.metric-val{font-size:20px;font-weight:700;color:var(--accent)}
+.metric-lbl{font-size:10px;color:var(--muted);margin-top:2px}
+.bar-item{display:flex;align-items:center;gap:7px;margin-bottom:7px}
+.bar-lbl{font-size:12px;width:68px;flex-shrink:0;color:var(--muted)}
+.bar-track{flex:1;height:7px;background:var(--border);border-radius:4px;overflow:hidden}
+.bar-fill{height:100%;border-radius:4px}
+.bar-score{font-size:11px;width:24px;text-align:right;color:var(--muted)}
+.tag{display:inline-block;font-size:11px;font-weight:700;padding:2px 7px;border-radius:20px}
 .tag-ok{background:var(--accent-l);color:var(--accent-t)}
 .tag-bad{background:var(--danger-l);color:var(--danger)}
-.rcard{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:8px}
-.r-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px}
-.r-name{font-weight:700;font-size:14px}
-.r-time{font-size:11px;color:var(--hint)}
-.r-notes{margin-top:8px;padding-top:8px;border-top:1px solid var(--border);font-size:12px;color:var(--muted)}
-.overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:999;padding:20px}
-.pin-box{background:var(--surface);border-radius:var(--radius);padding:28px 24px;width:100%;max-width:300px;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.2)}
-.pin-title{font-size:16px;font-weight:700;margin-bottom:4px}
-.pin-sub{font-size:13px;color:var(--muted);margin-bottom:16px}
-.pin-input{width:100%;padding:14px;text-align:center;font-size:24px;letter-spacing:.3em;border:1px solid var(--border);border-radius:var(--radius-s);font-family:inherit;margin-bottom:12px;background:var(--bg)}
-.pin-error{font-size:12px;color:var(--danger);margin-bottom:8px}
-.notice{background:var(--accent-l);border:1px solid #B8D4BE;border-radius:var(--radius-s);padding:12px 14px;font-size:13px;color:var(--accent-t);margin-bottom:12px}
-.saved-pill{display:inline-block;background:var(--accent-l);color:var(--accent-t);font-size:12px;font-weight:700;padding:4px 12px;border-radius:20px;margin-top:10px}
-.empty{text-align:center;padding:40px 20px;color:var(--hint);font-size:14px}
+.tag-cat{background:#EEF2FF;color:#3730A3;font-size:10px;padding:2px 7px;border-radius:20px}
+.rcard{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:12px;margin-bottom:7px}
+.r-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:5px}
+.r-name{font-weight:700;font-size:13px}
+.r-time{font-size:10px;color:var(--hint)}
+.r-notes{margin-top:7px;padding-top:7px;border-top:1px solid var(--border);font-size:12px;color:var(--muted)}
+.notice{background:var(--accent-l);border:1px solid #B8D4BE;border-radius:var(--radius-s);padding:10px 12px;font-size:13px;color:var(--accent-t);margin-bottom:10px}
+.saved-pill{display:inline-block;background:var(--accent-l);color:var(--accent-t);font-size:12px;font-weight:700;padding:3px 10px;border-radius:20px;margin-top:8px}
+.empty{text-align:center;padding:32px 16px;color:var(--hint);font-size:14px}
 
-/* Session list */
-.scard{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-bottom:10px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:border-color .15s}
-.scard:hover{border-color:var(--accent)}
-.scard-info{flex:1}
-.scard-name{font-weight:700;font-size:15px}
-.scard-meta{font-size:12px;color:var(--muted);margin-top:2px}
-.scard-count{background:var(--accent-l);color:var(--accent-t);font-size:12px;font-weight:700;padding:3px 10px;border-radius:20px}
-.scard-arrow{color:var(--hint);font-size:18px}
-.badge-new{background:var(--warn-l);color:var(--warn);font-size:11px;font-weight:700;padding:2px 7px;border-radius:20px;margin-left:6px}
-.qr-wrap{text-align:center;padding:8px 0}
+/* 分類相關 */
+.cat-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.cat-badge{display:inline-flex;align-items:center;gap:5px;background:#EEF2FF;color:#3730A3;font-size:12px;font-weight:700;padding:3px 10px;border-radius:20px}
+.cat-block{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:12px;overflow:hidden}
+.cat-title-row{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;cursor:pointer;border-bottom:1px solid var(--border)}
+.cat-title{font-weight:700;font-size:15px;display:flex;align-items:center;gap:8px}
+.cat-count{font-size:11px;color:var(--muted);background:var(--bg);padding:2px 8px;border-radius:20px;border:1px solid var(--border)}
+.cat-arrow{color:var(--hint);font-size:14px;transition:transform .2s}
+.cat-arrow.open{transform:rotate(90deg)}
+.cat-body{padding:10px}
+.sess-row{display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid var(--border);border-radius:var(--radius-s);margin-bottom:6px;background:var(--bg)}
+.sess-info{flex:1;cursor:pointer}
+.sess-name{font-size:13px;font-weight:500}
+.sess-meta{font-size:11px;color:var(--muted);margin-top:1px}
+.sess-count{background:var(--accent-l);color:var(--accent-t);font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;white-space:nowrap;cursor:pointer}
+.sess-btns{display:flex;gap:4px;flex-shrink:0}
+
+/* 趨勢圖 */
+.trend-wrap{overflow-x:auto;margin-top:6px}
+.trend-svg{display:block}
+.trend-tabs{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:8px}
+.trend-tab{padding:4px 10px;border:1px solid var(--border);border-radius:20px;font-size:11px;cursor:pointer;background:none;font-family:inherit;color:var(--muted)}
+.trend-tab.active{background:var(--accent-l);border-color:var(--accent);color:var(--accent-t);font-weight:700}
+
+/* 分次列表 */
+.round-row{display:flex;align-items:center;gap:8px;padding:7px 10px;border:1px solid var(--border);border-radius:var(--radius-s);margin-bottom:5px;cursor:pointer;background:var(--bg)}
+.round-num{background:var(--accent);color:#fff;font-size:11px;font-weight:700;width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.round-info{flex:1}
+.round-name{font-size:13px;font-weight:500}
+.round-meta{font-size:11px;color:var(--muted)}
+.round-count{font-size:11px;color:var(--muted);background:var(--border);padding:2px 7px;border-radius:20px}
+
+.qr-wrap{text-align:center;padding:6px 0}
 .qr-img{width:200px;height:200px;border-radius:var(--radius);border:1px solid var(--border)}
-@keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
-.content>*{animation:fadeIn .2s ease}
+.pin-page{text-align:center;padding:24px 16px}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:999;padding:16px}
+.pin-box{background:var(--surface);border-radius:var(--radius);padding:24px 20px;width:100%;max-width:290px;text-align:center}
+.pin-input{width:100%;padding:12px;text-align:center;font-size:22px;letter-spacing:.3em;border:1px solid var(--border);border-radius:var(--radius-s);font-family:inherit;margin-bottom:10px;background:var(--bg)}
+.pin-error{font-size:12px;color:var(--danger);margin-bottom:7px}
 </style>
 </head>
 <body>
@@ -138,239 +127,203 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
     <div class="h-sub" id="h-sub">載入中...</div>
   </div>
   <nav class="nav" id="nav"></nav>
-  <div class="content" id="content"></div>
+  <div class="content" id="content"><div class="empty">載入中...</div></div>
 </div>
-
 <script>
+// ── Firebase REST ──
+const FB = 'https://evaluation-survey-form-default-rtdb.firebaseio.com';
+async function fbGet(p){const r=await fetch(`${FB}/${p}.json`);if(!r.ok)throw new Error('HTTP '+r.status);return r.json();}
+async function fbSet(p,v){const r=await fetch(`${FB}/${p}.json`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(v)});if(!r.ok)throw new Error('HTTP '+r.status);}
+async function fbPush(p,v){const r=await fetch(`${FB}/${p}.json`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(v)});if(!r.ok)throw new Error('HTTP '+r.status);return r.json();}
+async function fbDel(p){await fetch(`${FB}/${p}.json`,{method:'DELETE'});}
+
 const TASTES=['鹹','甜','辣','辛/嗆','油','苦','茶','奶','焦','澀','酸','果香','咖啡','香料'];
 const FIXED=['氣味/香氣','口感/酥脆','口感/黏牙'];
-const ADMIN_PIN_KEY='pinpan_admin_pin';
-const BASE_URL = location.href.split('?')[0].split('#')[0];
+const DEFAULT_CATS=['原料','專案','試車','首批大貨','保存測試'];
+const BASE_URL=location.href.split('?')[0].split('#')[0];
+const CAT_COLORS={'原料':'#7C3AED','專案':'#0369A1','試車':'#B45309','首批大貨':'#065F46','保存測試':'#9D174D'};
+function safeKey(k){return k.replace(/[\/\.\[\]#\$]/g,'_');}
+function getSid(){return new URLSearchParams(location.search).get('s');}
 
-let fb = false;
-
-// URL 中讀取 session id
-function getSessionId() {
-  return new URLSearchParams(location.search).get('s');
-}
-
-let S = {
-  tab: 'form',         // 品評者預設：form；管理員預設：sessions
-  adminOK: false,
-  adminPrompt: false,
-  adminErr: false,
-  pinOK: false,
-  pinErr: false,
-  savedBadge: false,
-  adminPin: '1234',
-
-  // 管理員端
-  sessions: {},        // { id: { product, testDate, evalDate, enabledTastes, showAnomaly, pin, createdAt } }
-  currentSession: null, // 正在查看的 session id（後台）
-  editSession: null,   // 正在編輯的 session（新增/修改）
-  editIsNew: false,
-  responses: {},       // { sessionId: [resp, ...] }
-
-  // 品評者端
-  sessionId: null,     // 從 URL 讀取
-  sessionSetup: null,  // 對應 session 的設定
-  form: { page:0, name:'', dept:'', scores:{}, notes:{}, anomaly:null, overallLike:0, buyIntent:null, finalNote:'' }
+let S={
+  tab:'form', adminOK:false, adminPrompt:false, adminErr:false,
+  pinOK:false, pinErr:false, savedBadge:false, adminPin:'1234',
+  // data
+  categories:{},   // {catId:{name,color,order}}
+  sessions:{},     // {sessId:{name,catId,catName,testDate,evalDate,enabledTastes,showAnomaly,roundNum,parentId,createdAt}}
+  responses:{},    // {sessId:[...]}
+  // nav state
+  expandedCats:{},
+  currentSessId:null,
+  currentCatId:null,
+  editSess:null, editIsNew:false,
+  editCat:null, editCatIsNew:false,
+  qrSessId:null,
+  dashView:'single', // 'single' | 'trend'
+  // form
+  sessionId:null, sessionSetup:null,
+  form:{page:0,name:'',dept:'',scores:{},notes:{},anomaly:null,overallLike:0,buyIntent:null,finalNote:''}
 };
 
-// ── Firebase helpers ──
-function fbRef(path) { return window._ref(window._db, path); }
-async function fbSet(path, val) { await window._set(fbRef(path), val); }
-async function fbPush(path, val) { return await window._push(fbRef(path), val); }
-function fbListen(path, cb) { window._onValue(fbRef(path), snap => cb(snap.val())); }
-async function fbRemove(path) { await window._remove(fbRef(path)); }
+// ── Admin PIN ──
+function loadPin(){const p=localStorage.getItem('pp_pin');if(p)S.adminPin=p;}
+function savePin(){localStorage.setItem('pp_pin',S.adminPin);}
 
-// ── 管理員 PIN ──
-function loadAdminPin() {
-  const p = localStorage.getItem(ADMIN_PIN_KEY);
-  if (p) S.adminPin = p;
+// ── Header tap ──
+let tapN=0,tapT=null;
+function headerTap(){
+  if(S.adminOK)return;
+  tapN++;clearTimeout(tapT);
+  tapT=setTimeout(()=>tapN=0,2000);
+  if(tapN>=5){tapN=0;S.adminPrompt=true;render();}
 }
-function saveAdminPin() {
-  localStorage.setItem(ADMIN_PIN_KEY, S.adminPin);
-}
-
-// ── Header tap (5次進管理) ──
-let tapCount=0, tapTimer=null;
-function headerTap() {
-  if (S.adminOK) return;
-  tapCount++;
-  clearTimeout(tapTimer);
-  tapTimer = setTimeout(()=>tapCount=0, 2000);
-  if (tapCount >= 5) { tapCount=0; S.adminPrompt=true; render(); }
-}
-
-function verifyAdmin() {
-  const el = document.getElementById('adm-pin');
-  if (!el) return;
-  if (el.value === S.adminPin) {
-    S.adminOK=true; S.adminPrompt=false; S.adminErr=false;
-    S.tab='sessions';
-  } else { S.adminErr=true; }
+function verifyAdmin(){
+  const el=document.getElementById('adm-pin');if(!el)return;
+  if(el.value===S.adminPin){S.adminOK=true;S.adminPrompt=false;S.adminErr=false;S.tab='list';}
+  else S.adminErr=true;
   render();
 }
+function exitAdmin(){S.adminOK=false;S.tab='form';render();scrollTo(0,0);}
 
-function exitAdmin() {
-  S.adminOK=false; S.tab='form'; render(); scrollTo(0,0);
-}
-
-// ── Sessions (管理員) ──
-function listenSessions() {
-  fbListen('sessions', data => {
-    S.sessions = data || {};
-    if (S.adminOK) render();
-  });
-}
-
-function listenAllResponses() {
-  fbListen('responses', data => {
-    S.responses = {};
-    if (data) {
-      Object.entries(data).forEach(([sid, resps]) => {
-        S.responses[sid] = Object.values(resps);
-      });
+// ── Load ──
+async function loadAll(){
+  try{
+    const [cats,sess,resp]=await Promise.all([fbGet('categories'),fbGet('sessions'),fbGet('responses')]);
+    S.categories=cats||{};
+    S.sessions=sess||{};
+    S.responses={};
+    if(resp)Object.entries(resp).forEach(([sid,rs])=>{S.responses[sid]=Object.values(rs);});
+    // 若無分類，初始化預設
+    if(Object.keys(S.categories).length===0){
+      for(let i=0;i<DEFAULT_CATS.length;i++){
+        const id='cat'+Date.now()+i;
+        S.categories[id]={name:DEFAULT_CATS[i],color:CAT_COLORS[DEFAULT_CATS[i]]||'#374151',order:i};
+        await fbSet(`categories/${id}`,S.categories[id]);
+      }
     }
-    if (S.adminOK) render();
-  });
+  }catch(e){console.error(e);}
+}
+async function loadSessionSetup(sid){
+  try{S.sessionSetup=await fbGet(`sessions/${sid}`);}catch(e){S.sessionSetup=null;}
+  updateHeader();render();
 }
 
-async function saveSession(sess) {
-  await fbSet(`sessions/${sess.id}`, sess);
+// ── Categories ──
+function sortedCats(){return Object.entries(S.categories).sort((a,b)=>(a[1].order||0)-(b[1].order||0));}
+function sessInCat(catId){return Object.entries(S.sessions).filter(([,s])=>s.catId===catId).sort((a,b)=>(a[1].roundNum||0)-(b[1].roundNum||0));}
+function newCat(){S.editCat={id:'cat'+Date.now(),name:'',color:'#374151',order:Object.keys(S.categories).length};S.editCatIsNew=true;S.tab='editcat';render();}
+async function saveCat(){
+  const el=document.getElementById('cat-name');const cel=document.getElementById('cat-color');
+  if(!el||!el.value.trim()){alert('請填入分類名稱');return;}
+  S.editCat.name=el.value.trim();
+  if(cel)S.editCat.color=cel.value;
+  await fbSet(`categories/${S.editCat.id}`,S.editCat);
+  S.categories[S.editCat.id]=S.editCat;
+  S.savedBadge=true;S.tab='list';render();
+  setTimeout(()=>{S.savedBadge=false;render();},2000);
+}
+async function deleteCat(id){
+  const name=S.categories[id]?.name||'';
+  const kids=sessInCat(id);
+  if(kids.length>0){alert(`「${name}」分類下還有 ${kids.length} 個品評，請先刪除所有品評後再刪除分類。`);return;}
+  if(!confirm(`確定刪除「${name}」分類？`))return;
+  await fbDel(`categories/${id}`);
+  delete S.categories[id];
+  S.tab='list';render();
 }
 
-async function deleteSession(id) {
-  if (!confirm('確定刪除此品評？已收集的回應也會一併刪除。')) return;
-  await fbRemove(`sessions/${id}`);
-  await fbRemove(`responses/${id}`);
-  S.currentSession = null;
-  render();
+// ── Sessions ──
+function nextRoundNum(catId){
+  const rounds=sessInCat(catId).map(([,s])=>s.roundNum||0);
+  return rounds.length>0?Math.max(...rounds)+1:1;
+}
+function newSess(catId){
+  const cat=S.categories[catId];
+  const roundNum=nextRoundNum(catId);
+  S.editSess={id:'sess'+Date.now(),name:'',catId,catName:cat?.name||'',testDate:'',evalDate:'',enabledTastes:[],showAnomaly:true,roundNum,createdAt:Date.now()};
+  S.editIsNew=true;S.tab='editsess';render();scrollTo(0,0);
+}
+function editSessFn(id){S.editSess=JSON.parse(JSON.stringify(S.sessions[id]));S.editIsNew=false;S.tab='editsess';render();scrollTo(0,0);}
+function readSessFields(){
+  const n=document.getElementById('ep-name');
+  const td=document.getElementById('ep-testDate');
+  const ed=document.getElementById('ep-evalDate');
+  const rn=document.getElementById('ep-round');
+  if(n)S.editSess.name=n.value;
+  if(td)S.editSess.testDate=td.value;
+  if(ed)S.editSess.evalDate=ed.value;
+  if(rn)S.editSess.roundNum=parseInt(rn.value)||1;
+}
+function toggleEditTaste(t){readSessFields();const i=S.editSess.enabledTastes.indexOf(t);if(i>=0)S.editSess.enabledTastes.splice(i,1);else S.editSess.enabledTastes.push(t);render();}
+function toggleEditAnomaly(){readSessFields();S.editSess.showAnomaly=!S.editSess.showAnomaly;render();}
+async function doSaveSess(){
+  readSessFields();
+  if(!S.editSess.name.trim()){alert('請填入品評名稱');return;}
+  await fbSet(`sessions/${S.editSess.id}`,S.editSess);
+  S.sessions[S.editSess.id]=S.editSess;
+  S.savedBadge=true;S.tab='list';
+  if(!S.expandedCats[S.editSess.catId])S.expandedCats[S.editSess.catId]=true;
+  render();setTimeout(()=>{S.savedBadge=false;render();},2000);
+}
+async function deleteSessFn(id){
+  if(!confirm('確定刪除此品評？所有回應資料也會一併刪除。'))return;
+  await fbDel(`sessions/${id}`);await fbDel(`responses/${id}`);
+  delete S.sessions[id];delete S.responses[id];
+  S.tab='list';render();
 }
 
-// ── 品評者：從 URL 載入 session ──
-function listenSessionSetup(sid) {
-  fbListen(`sessions/${sid}`, data => {
-    S.sessionSetup = data;
-    updateHeader();
-    if (S.tab==='form') render();
-  });
+// ── Form ──
+function getPages(){
+  const cfg=S.sessionSetup;
+  if(!cfg)return['填寫'];
+  return['基本資訊','固定評分',...(cfg.enabledTastes||[]).map(t=>t+'評分'),'整體評估'];
 }
+function setScore(k,v){S.form.scores[k]=S.form.scores[k]===v?0:v;render();}
+function setNA(k){S.form.scores[k]=S.form.scores[k]==='N/A'?0:'N/A';render();}
+function setNoteVal(k,v){S.form.notes[k]=v;}
+function setOverall(v){S.form.overallLike=S.form.overallLike===v?0:v;render();}
+function setAnomalyVal(v){S.form.anomaly=S.form.anomaly===v?null:v;render();}
+function setIntent(v){S.form.buyIntent=S.form.buyIntent===v?null:v;render();}
+function nextPage(){const p=getPages();if(S.form.page<p.length-1){S.form.page++;render();scrollTo(0,0);}}
+function prevPage(){if(S.form.page>0){S.form.page--;render();scrollTo(0,0);}}
 
-// ── 表單填寫 ──
-function getPages() {
-  const cfg = S.adminOK ? S.editSession : S.sessionSetup;
-  if (!cfg) return ['填寫'];
-  return ['基本資訊','固定評分',...(cfg.enabledTastes||[]).map(t=>t+'評分'),'整體評估'];
-}
-
-function setScore(k,v){ S.form.scores[k]=S.form.scores[k]===v?0:v; render(); }
-function setNA(k){ S.form.scores[k]=S.form.scores[k]==='N/A'?0:'N/A'; render(); }
-function setNoteVal(k,v){ S.form.notes[k]=v; }
-function setOverall(v){ S.form.overallLike=S.form.overallLike===v?0:v; render(); }
-function setAnomalyVal(v){ S.form.anomaly=S.form.anomaly===v?null:v; render(); }
-function setIntent(v){ S.form.buyIntent=S.form.buyIntent===v?null:v; render(); }
-function nextPage(){ const p=getPages(); if(S.form.page<p.length-1){S.form.page++;render();scrollTo(0,0);} }
-function prevPage(){ if(S.form.page>0){S.form.page--;render();scrollTo(0,0);} }
-
-async function submitForm() {
-  const sid = S.sessionId;
-  if (!sid) return alert('找不到品評資訊，請重新掃碼');
-  const resp = {
-    name: S.form.name||'匿名', dept: S.form.dept,
-    scores:{...S.form.scores}, notes:{...S.form.notes},
-    anomaly: S.form.anomaly, overallLike: S.form.overallLike,
-    buyIntent: S.form.buyIntent, finalNote: S.form.finalNote,
-    ts: Date.now(),
-    time: new Date().toLocaleString('zh-TW',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'})
+async function submitForm(){
+  const sid=S.sessionId;
+  if(!sid){alert('找不到品評資訊，請重新掃碼');return;}
+  function sanitize(obj){const r={};Object.entries(obj||{}).forEach(([k,v])=>{r[safeKey(k)]=v;});return r;}
+  const resp={
+    name:S.form.name||'匿名',dept:S.form.dept,
+    scores:sanitize(S.form.scores),notes:sanitize(S.form.notes),
+    anomaly:S.form.anomaly,overallLike:S.form.overallLike,
+    buyIntent:S.form.buyIntent,finalNote:S.form.finalNote,
+    ts:Date.now(),time:new Date().toLocaleString('zh-TW',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'})
   };
-  try { await fbPush(`responses/${sid}`, resp); } catch(e) { alert('送出失敗，請檢查網路'); return; }
-  S.form={page:0,name:'',dept:'',scores:{},notes:{},anomaly:null,overallLike:0,buyIntent:null,finalNote:''};
-  document.getElementById('content').innerHTML=`
-    <div style="text-align:center;padding:60px 20px">
-      <div style="font-size:52px;margin-bottom:16px">✓</div>
-      <div style="font-size:20px;font-weight:700;color:var(--accent);margin-bottom:8px">品評已送出！</div>
-      <div style="font-size:14px;color:var(--muted);margin-bottom:24px">感謝你的參與</div>
-      <button class="btn btn-s btn-sm" onclick="S.form={page:0,name:'',dept:'',scores:{},notes:{},anomaly:null,overallLike:0,buyIntent:null,finalNote:''};render()" style="width:auto">再填一份</button>
-    </div>`;
+  try{
+    const res=await fetch(`${FB}/responses/${sid}.json`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(resp)});
+    if(!res.ok)throw new Error('HTTP '+res.status+': '+(await res.text()));
+    S.form={page:0,name:'',dept:'',scores:{},notes:{},anomaly:null,overallLike:0,buyIntent:null,finalNote:''};
+    document.getElementById('content').innerHTML=`
+      <div style="text-align:center;padding:50px 16px">
+        <div style="font-size:48px;margin-bottom:14px">✓</div>
+        <div style="font-size:19px;font-weight:700;color:var(--accent);margin-bottom:6px">品評已送出！</div>
+        <div style="font-size:13px;color:var(--muted);margin-bottom:20px">感謝你的參與</div>
+        <button class="btn btn-s btn-sm" onclick="S.form={page:0,name:'',dept:'',scores:{},notes:{},anomaly:null,overallLike:0,buyIntent:null,finalNote:''};render()" style="width:auto">再填一份</button>
+      </div>`;
+  }catch(e){alert('送出失敗：'+e.message);}
 }
 
-// ── 管理員 session 編輯 ──
-function newSession() {
-  S.editSession = {
-    id: 'sess_' + Date.now(),
-    product:'', testDate:'', evalDate:'',
-    enabledTastes:[], showAnomaly:true,
-    createdAt: Date.now()
-  };
-  S.editIsNew = true;
-  S.tab = 'edit';
-  render(); scrollTo(0,0);
-}
+// ── Dashboard ──
+function openDash(sid){S.currentSessId=sid;S.pinOK=false;S.pinErr=false;S.tab='dashboard';S.dashView='single';render();scrollTo(0,0);}
+function verifyDashPin(){const el=document.getElementById('pin-inp');if(!el)return;const v=el.value;if(v===S.adminPin){S.pinOK=true;S.pinErr=false;}else S.pinErr=true;render();}
+async function refreshDash(){const d=await fbGet('responses');S.responses={};if(d)Object.entries(d).forEach(([sid,rs])=>{S.responses[sid]=Object.values(rs);});render();}
+async function clearRespFn(sid){if(!confirm('確定清除此品評所有數據？'))return;await fbDel(`responses/${sid}`);delete S.responses[sid];render();}
 
-function editSession(id) {
-  S.editSession = JSON.parse(JSON.stringify(S.sessions[id]));
-  S.editIsNew = false;
-  S.tab = 'edit';
-  render(); scrollTo(0,0);
-}
+function showQR(sid){S.qrSessId=sid;S.tab='qr';render();scrollTo(0,0);}
 
-function readEditFields() {
-  ['ep-product','ep-testDate','ep-evalDate'].forEach(id => {
-    const el=document.getElementById(id);
-    if (el) {
-      const k = id.replace('ep-','');
-      S.editSession[k] = el.value;
-    }
-  });
-}
-
-function toggleEditTaste(t) {
-  readEditFields();
-  const i=S.editSession.enabledTastes.indexOf(t);
-  if(i>=0) S.editSession.enabledTastes.splice(i,1);
-  else S.editSession.enabledTastes.push(t);
-  render();
-}
-
-function toggleEditAnomaly() {
-  readEditFields();
-  S.editSession.showAnomaly=!S.editSession.showAnomaly;
-  render();
-}
-
-async function doSaveSession() {
-  readEditFields();
-  if (!S.editSession.product.trim()) { alert('請填入產品名稱'); return; }
-  await saveSession(S.editSession);
-  S.savedBadge=true;
-  S.tab='sessions';
-  render();
-  setTimeout(()=>{S.savedBadge=false;render();},2500);
-}
-
-// ── 後台分析 ──
-function openDashboard(sid) {
-  S.currentSession=sid; S.pinOK=false; S.pinErr=false;
-  S.tab='dashboard'; render(); scrollTo(0,0);
-}
-
-function verifyDashPin() {
-  const el=document.getElementById('pin-inp');
-  if (!el) return;
-  const sess = S.sessions[S.currentSession];
-  const pin = (sess && sess.pin) ? sess.pin : S.adminPin;
-  if (el.value===pin){S.pinOK=true;S.pinErr=false;}
-  else{S.pinErr=true;}
-  render();
-}
-
-// ── Render helpers ──
-function starBlock(key, label, allowNA) {
-  const sc=S.form.scores[key]||0; const isNA=sc==='N/A';
+function starBlock(key,label,allowNA){
+  const sc=S.form.scores[key]||0,isNA=sc==='N/A';
   let stars='';
-  for(let i=1;i<=5;i++) stars+=`<span class="star ${!isNA&&sc>=i?'lit':''}" onclick="setScore('${key}',${i})">★</span>`;
+  for(let i=1;i<=5;i++)stars+=`<span class="star ${!isNA&&sc>=i?'lit':''}" onclick="setScore('${key}',${i})">★</span>`;
   return `<div class="star-block">
     <div class="star-q">${label}</div>
     <div class="star-row"><div class="stars">${stars}</div>${allowNA?`<button class="na-btn ${isNA?'on':''}" onclick="setNA('${key}')">N/A</button>`:''}</div>
@@ -379,342 +332,461 @@ function starBlock(key, label, allowNA) {
   </div>`;
 }
 
-// ════════════════════════════════
-// RENDER FUNCTIONS
-// ════════════════════════════════
-
-function renderAdminPrompt() {
-  return `<div class="overlay">
+// ══════════════════════════════════
+// RENDERS
+// ══════════════════════════════════
+function renderAdminPrompt(){
+  return`<div class="overlay">
     <div class="pin-box">
-      <div class="pin-title">管理員登入</div>
-      <div class="pin-sub">連點標題 5 下後輸入 PIN</div>
-      <input class="pin-input" type="password" id="adm-pin" placeholder="••••" maxlength="8" onkeydown="if(event.key==='Enter')verifyAdmin()">
+      <div style="font-size:15px;font-weight:700;margin-bottom:3px">管理員登入</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:14px">連點標題 5 下後輸入 PIN</div>
+      <input type="password" id="adm-pin" placeholder="••••" maxlength="8" onkeydown="if(event.key==='Enter')verifyAdmin()" class="pin-input">
       ${S.adminErr?`<div class="pin-error">PIN 碼錯誤</div>`:''}
-      <button class="btn btn-p" onclick="verifyAdmin()" style="margin-bottom:10px">確認</button>
+      <button class="btn btn-p" onclick="verifyAdmin()" style="margin-bottom:8px">確認</button>
       <button class="btn btn-s" onclick="S.adminPrompt=false;render()" style="font-size:13px">取消</button>
     </div>
   </div>`;
 }
 
-// 管理員：品評列表
-function renderSessions() {
-  const ids = Object.keys(S.sessions);
-  return `
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
-      <div class="slabel" style="margin:0">品評列表</div>
-      <button class="btn btn-p btn-sm" onclick="newSession()" style="width:auto">＋ 新增品評</button>
+function renderList(){
+  const cats=sortedCats();
+  return`
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+      <div class="slabel" style="margin:0">品評管理</div>
+      <div style="display:flex;gap:6px">
+        <button class="btn btn-s btn-sm" onclick="newCat()" style="width:auto">＋ 新增分類</button>
+      </div>
     </div>
-    ${S.savedBadge?`<div class="notice">✓ 已儲存並同步</div>`:''}
-    ${ids.length===0?`<div class="empty">尚無品評<br><span style="font-size:13px">點右上角「新增品評」開始</span></div>`:''}
-    ${ids.map(id=>{
-      const s=S.sessions[id];
-      const count=(S.responses[id]||[]).length;
-      return `<div class="scard" onclick="openDashboard('${id}')">
-        <div class="scard-info">
-          <div class="scard-name">${s.product||'（未命名）'}</div>
-          <div class="scard-meta">${s.evalDate?'品評日：'+s.evalDate:''} ${s.enabledTastes&&s.enabledTastes.length?'・'+s.enabledTastes.join('、'):''}</div>
+    ${S.savedBadge?`<div class="notice">✓ 已儲存</div>`:''}
+    ${cats.length===0?`<div class="empty">尚無分類</div>`:''}
+    ${cats.map(([catId,cat])=>{
+      const kids=sessInCat(catId);
+      const isOpen=!!S.expandedCats[catId];
+      const color=cat.color||'#374151';
+      return`<div class="cat-block">
+        <div class="cat-title-row" onclick="S.expandedCats['${catId}']=!S.expandedCats['${catId}'];render()">
+          <div class="cat-title">
+            <span style="width:10px;height:10px;border-radius:50%;background:${color};display:inline-block;flex-shrink:0"></span>
+            ${cat.name}
+            <span class="cat-count">${kids.length} 個品評</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px">
+            <button class="btn btn-s btn-xs" onclick="event.stopPropagation();newSess('${catId}')" style="width:auto">＋ 新增</button>
+            <button class="btn btn-xs" onclick="event.stopPropagation();S.editCat=JSON.parse(JSON.stringify(S.categories['${catId}']));S.editCatIsNew=false;S.tab='editcat';render()" style="width:auto;background:var(--bg);border:1px solid var(--border)">編輯</button>
+            <span class="cat-arrow ${isOpen?'open':''}">›</span>
+          </div>
         </div>
-        <div class="scard-count">${count} 份</div>
-        <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end">
-          <button class="btn btn-s btn-sm" onclick="event.stopPropagation();editSession('${id}')" style="width:auto;font-size:12px;padding:5px 10px">編輯</button>
-          <button class="btn btn-sm" onclick="event.stopPropagation();showQR('${id}')" style="width:auto;font-size:12px;padding:5px 10px;background:var(--accent-l);color:var(--accent-t);border:1px solid var(--accent);font-weight:700">QR碼</button>
-        </div>
+        ${isOpen?`<div class="cat-body">
+          ${kids.length===0?`<div style="font-size:13px;color:var(--hint);padding:8px 0;text-align:center">尚無品評，點右上角「＋ 新增」建立</div>`:''}
+          ${kids.map(([sid,sess])=>{
+            const cnt=(S.responses[sid]||[]).length;
+            return`<div class="sess-row">
+              <div style="flex-shrink:0;width:24px;height:24px;border-radius:50%;background:${color};color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center">${sess.roundNum||'#'}</div>
+              <div class="sess-info" onclick="openDash('${sid}')">
+                <div class="sess-name">${sess.name}</div>
+                <div class="sess-meta">${sess.evalDate?'品評：'+sess.evalDate:''}</div>
+              </div>
+              <span class="sess-count" onclick="openDash('${sid}')">${cnt} 份</span>
+              <div class="sess-btns">
+                <button class="btn btn-xs" onclick="showQR('${sid}')" style="background:var(--accent-l);color:var(--accent-t);border:1px solid var(--accent);font-weight:700">QR</button>
+                <button class="btn btn-s btn-xs" onclick="editSessFn('${sid}')" style="width:auto">編輯</button>
+              </div>
+            </div>`;
+          }).join('')}
+        </div>`:''}
       </div>`;
     }).join('')}
-    <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border)">
+    <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border)">
       <div class="slabel">管理員 PIN 碼</div>
       <div class="card">
         <div class="field">
-          <label>PIN 碼（用於進入管理介面）</label>
-          <input type="password" id="global-pin" value="${S.adminPin}" style="max-width:160px">
+          <label>PIN 碼</label>
+          <input type="password" id="global-pin" value="${S.adminPin}" style="max-width:150px">
         </div>
-        <button class="btn btn-s btn-sm" onclick="const el=document.getElementById('global-pin');if(el&&el.value){S.adminPin=el.value;saveAdminPin();alert('PIN 已更新');}">儲存 PIN</button>
+        <button class="btn btn-s btn-sm" onclick="const el=document.getElementById('global-pin');if(el&&el.value){S.adminPin=el.value;savePin();alert('PIN 已更新');}">儲存 PIN</button>
       </div>
     </div>`;
 }
 
-// 管理員：新增/編輯品評
-function renderEdit() {
-  const s=S.editSession;
-  return `
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
-      <button class="btn btn-s btn-sm" onclick="S.tab='sessions';render()" style="width:auto">← 返回</button>
-      <div style="font-weight:700">${S.editIsNew?'新增品評':'編輯品評'}</div>
+function renderEditCat(){
+  const c=S.editCat;
+  return`
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+      <button class="btn btn-s btn-sm" onclick="S.tab='list';render()" style="width:auto">← 返回</button>
+      <div style="font-weight:700">${S.editCatIsNew?'新增分類':'編輯分類'}</div>
     </div>
-    <div class="slabel">產品資訊</div>
     <div class="card">
-      <div class="field"><label>產品名稱 *</label><input id="ep-product" type="text" value="${s.product}" placeholder="例：海苔鹹餅乾 #3"></div>
+      <div class="field"><label>分類名稱 *</label><input id="cat-name" type="text" value="${c.name}" placeholder="例：保存測試"></div>
+      <div class="field"><label>顏色標籤</label><input id="cat-color" type="color" value="${c.color||'#374151'}" style="width:60px;height:36px;padding:2px;cursor:pointer;border-radius:var(--radius-s)"></div>
+    </div>
+    <button class="btn btn-p" onclick="saveCat()">✓ 儲存分類</button>
+    ${!S.editCatIsNew?`<button class="btn btn-d" onclick="deleteCat('${c.id}')" style="margin-top:8px">刪除分類</button>`:''}`;
+}
+
+function renderEditSess(){
+  const s=S.editSess;
+  const cat=S.categories[s.catId];
+  return`
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+      <button class="btn btn-s btn-sm" onclick="S.tab='list';render()" style="width:auto">← 返回</button>
+      <div style="font-weight:700">${S.editIsNew?'新增品評':'編輯品評'}</div>
+      ${cat?`<span class="tag-cat" style="background:${cat.color}22;color:${cat.color}">${cat.name}</span>`:''}
+    </div>
+    <div class="slabel">基本資訊</div>
+    <div class="card">
+      <div class="field"><label>品評名稱 *</label><input id="ep-name" type="text" value="${s.name}" placeholder="例：海苔鹹餅乾 第3次品評"></div>
+      <div class="field"><label>第幾次品評</label><input id="ep-round" type="number" value="${s.roundNum||1}" min="1" style="max-width:100px"></div>
       <div class="field"><label>試製日期</label><input id="ep-testDate" type="date" value="${s.testDate||''}"></div>
       <div class="field"><label>品評日期</label><input id="ep-evalDate" type="date" value="${s.evalDate||''}"></div>
     </div>
-    <div class="slabel">本次啟用的滋味項目</div>
+    <div class="slabel">啟用的滋味評分項目</div>
     <div class="card">
       <div class="chips">${TASTES.map(t=>`<button class="chip ${s.enabledTastes.includes(t)?'on':''}" onclick="toggleEditTaste('${t}')">${t}</button>`).join('')}</div>
-      <div style="margin-top:10px;font-size:12px;color:var(--hint)">已選 ${s.enabledTastes.length} 項</div>
+      <div style="margin-top:8px;font-size:12px;color:var(--hint)">已選 ${s.enabledTastes.length} 項</div>
     </div>
     <div class="slabel">可選評估項目</div>
     <div class="card">
-      <button class="chip red ${s.showAnomaly?'on':''}" onclick="toggleEditAnomaly()" style="width:auto;padding:8px 16px">異味檢測</button>
-      <div style="margin-top:8px;font-size:12px;color:var(--hint)">整體喜好、購買意願為固定末端項目</div>
+      <button class="chip red ${s.showAnomaly?'on':''}" onclick="toggleEditAnomaly()" style="width:auto;padding:7px 14px">異味檢測</button>
+      <div style="margin-top:7px;font-size:12px;color:var(--hint)">整體喜好、購買意願為固定末端項目</div>
     </div>
-    <button class="btn btn-p" onclick="doSaveSession()">✓ 儲存並產生 QR Code</button>
-    ${!S.editIsNew?`<button class="btn btn-d" onclick="deleteSession('${s.id}')" style="margin-top:8px">刪除此品評</button>`:''}`;
+    <button class="btn btn-p" onclick="doSaveSess()">✓ 儲存並產生 QR Code</button>
+    ${!S.editIsNew?`<button class="btn btn-d" onclick="deleteSessFn('${s.id}')" style="margin-top:8px">刪除此品評</button>`:''}`;
 }
 
-// QR Code 頁（管理員點 QR碼按鈕）
-let _qrSessionId = null;
-function showQR(sid) {
-  _qrSessionId=sid; S.tab='qr'; render(); scrollTo(0,0);
-}
-
-function renderQR() {
-  const sid = _qrSessionId;
-  const s = sid ? S.sessions[sid] : null;
-  if (!s) return `<div class="empty">找不到品評資訊</div>`;
-  const url = `${BASE_URL}?s=${sid}`;
-  const qr = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(url)}`;
-  const count = (S.responses[sid]||[]).length;
-  return `
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
-      <button class="btn btn-s btn-sm" onclick="S.tab='sessions';render()" style="width:auto">← 返回</button>
-    </div>
-    <div class="notice">品評者掃碼後直接在手機填寫，資料自動集中</div>
-    <div class="card qr-wrap">
-      <img class="qr-img" src="${qr}" alt="QR Code">
-      <div style="font-size:16px;font-weight:700;margin-top:12px">${s.product}</div>
-      ${s.evalDate?`<div style="font-size:12px;color:var(--muted);margin-top:4px">品評日期：${s.evalDate}</div>`:''}
-      ${s.enabledTastes&&s.enabledTastes.length?`<div style="font-size:12px;color:var(--muted);margin-top:2px">評分項目：${s.enabledTastes.join('、')}</div>`:''}
-      <div style="font-size:12px;color:var(--muted);margin-top:4px">已收集 ${count} 份回應</div>
-      <div style="margin-top:16px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
-        <a href="${qr}" download="QRCode_${s.product}.png"><button class="btn btn-s btn-sm" style="width:auto">↓ 下載圖片</button></a>
-        <button class="btn btn-s btn-sm" onclick="window.print()" style="width:auto">列印</button>
-      </div>
-    </div>
-    <div class="card" style="font-size:13px;color:var(--muted)">
-      <div style="font-weight:700;color:var(--text);margin-bottom:6px">表單連結</div>
-      <div style="word-break:break-all;font-family:monospace;font-size:12px;background:var(--bg);padding:8px;border-radius:var(--radius-s)">${url}</div>
-    </div>`;
-}
-
-// 品評者填寫
-function renderForm() {
-  const cfg = S.sessionSetup;
-  if (!cfg) return `<div class="empty">載入中...<br><span style="font-size:13px">請確認網路連線</span></div>`;
-
-  const pages=getPages();
-  const p=S.form.page;
-  const isLast=p===pages.length-1;
+function renderForm(){
+  const cfg=S.sessionSetup;
+  if(!cfg)return`<div class="empty">載入中...<br><span style="font-size:13px">請確認網路連線</span></div>`;
+  const pages=getPages(),p=S.form.page,isLast=p===pages.length-1;
   let body='';
-
   if(p===0){
     body=`<div class="slabel">基本資訊</div><div class="card">
       <div class="field"><label>姓名</label><input type="text" value="${S.form.name}" placeholder="您的姓名" oninput="S.form.name=this.value"></div>
       <div class="field"><label>部門（選填）</label><input type="text" value="${S.form.dept}" placeholder="例：研發部" oninput="S.form.dept=this.value"></div>
-      <div style="font-size:13px;color:var(--muted);margin-top:4px">品評產品：<strong style="color:var(--text)">${cfg.product}</strong></div>
+      <div style="font-size:13px;color:var(--muted);margin-top:4px">品評產品：<strong style="color:var(--text)">${cfg.name}</strong></div>
+      ${cfg.catName?`<div style="font-size:12px;color:var(--hint);margin-top:2px">分類：${cfg.catName}${cfg.roundNum?' · 第'+cfg.roundNum+'次':''}</div>`:''}
     </div>`;
-  } else if(p===1){
-    body=`<div class="slabel">固定評分</div><div class="card">
-      ${FIXED.map((q,i)=>(i?'<hr class="divider">':'')+starBlock(q,q,true)).join('')}
-    </div>`;
-  } else if(!isLast){
+  }else if(p===1){
+    body=`<div class="slabel">固定評分</div><div class="card">${FIXED.map((q,i)=>(i?'<hr class="divider">':'')+starBlock(q,q,true)).join('')}</div>`;
+  }else if(!isLast){
     const taste=(cfg.enabledTastes||[])[p-2];
-    body=`<div class="slabel">${taste} 滋味評分</div><div class="card">${starBlock(taste,taste+'度',false)}</div>`;
-  } else {
+    body=`<div class="slabel">${taste} 滋味評分</div><div class="card">${starBlock(taste,taste+'度',true)}</div>`;
+  }else{
     body=`<div class="slabel">整體評估</div><div class="card">
       <div class="star-q">整體喜好</div>
-      <div class="stars" style="margin-bottom:16px">${[1,2,3,4,5].map(i=>`<span class="star ${S.form.overallLike>=i?'lit':''}" onclick="setOverall(${i})">★</span>`).join('')}</div>
+      <div class="stars" style="margin-bottom:14px">${[1,2,3,4,5].map(i=>`<span class="star ${S.form.overallLike>=i?'lit':''}" onclick="setOverall(${i})">★</span>`).join('')}</div>
       <hr class="divider">
       <div class="star-q">購買意願</div>
-      <div class="choice-group" style="margin-bottom:16px">
-        ${['一定會買','可能會買','猶豫中','可能不買','不會買'].map(v=>`<button class="choice-btn ${S.form.buyIntent===v?'sel':''}" onclick="setIntent('${v}')">${v}</button>`).join('')}
-      </div>
-      ${cfg.showAnomaly?`<hr class="divider">
-      <div class="star-q">是否有異味？</div>
-      <div class="choice-group" style="margin-bottom:16px">
+      <div class="choice-group" style="margin-bottom:14px">${['一定會買','可能會買','猶豫中','可能不買','不會買'].map(v=>`<button class="choice-btn ${S.form.buyIntent===v?'sel':''}" onclick="setIntent('${v}')">${v}</button>`).join('')}</div>
+      ${cfg.showAnomaly?`<hr class="divider"><div class="star-q">是否有異味？</div>
+      <div class="choice-group" style="margin-bottom:14px">
         <button class="choice-btn ${S.form.anomaly===false?'sel':''}" onclick="setAnomalyVal(false)">✓ 無異味</button>
         <button class="choice-btn red ${S.form.anomaly===true?'sel':''}" onclick="setAnomalyVal(true)">✗ 有異味</button>
       </div>`:''}
-      <hr class="divider">
-      <div class="star-q">整體意見</div>
-      <textarea class="note-input" rows="4" placeholder="整體感受、建議..." oninput="S.form.finalNote=this.value" style="margin-top:4px">${S.form.finalNote}</textarea>
+      <hr class="divider"><div class="star-q">整體意見</div>
+      <textarea class="note-input" rows="3" placeholder="整體感受、建議..." oninput="S.form.finalNote=this.value" style="margin-top:4px">${S.form.finalNote}</textarea>
     </div>`;
   }
+  return body+`<div class="page-nav">
+    <button class="btn btn-s" onclick="prevPage()" ${p===0?'disabled':''} style="opacity:${p===0?.3:1};flex:1;max-width:100px;min-height:48px">← 上一頁</button>
+    <div><div class="page-info">${p+1} / ${pages.length}</div><div class="dots">${pages.map((_,i)=>`<div class="dot ${i===p?'active':''}"></div>`).join('')}</div></div>
+    ${isLast?`<button class="btn btn-p" onclick="submitForm()" style="flex:1;max-width:110px;min-height:48px">送出 ✓</button>`:`<button class="btn btn-p" onclick="nextPage()" style="flex:1;max-width:100px;min-height:48px">下一頁 →</button>`}
+  </div>`;
+}
 
-  return body+`
-    <div class="page-nav">
-      <button class="btn btn-s" onclick="prevPage()" ${p===0?'disabled':''} style="opacity:${p===0?.3:1};flex:1;max-width:110px;font-size:14px">← 上一頁</button>
-      <div><div class="page-info">${p+1} / ${pages.length}</div><div class="dots">${pages.map((_,i)=>`<div class="dot ${i===p?'active':''}"></div>`).join('')}</div></div>
-      ${isLast
-        ?`<button class="btn btn-p" onclick="submitForm()" style="flex:1;max-width:120px;font-size:14px">送出 ✓</button>`
-        :`<button class="btn btn-p" onclick="nextPage()" style="flex:1;max-width:110px;font-size:14px">下一頁 →</button>`}
+function renderQR(){
+  const sid=S.qrSessId,sess=S.sessions[sid];
+  if(!sess)return`<div class="empty">找不到品評資訊</div>`;
+  const url=`${BASE_URL}?s=${sid}`;
+  const qr=`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(url)}`;
+  const cat=S.categories[sess.catId];
+  const cnt=(S.responses[sid]||[]).length;
+  return`
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+      <button class="btn btn-s btn-sm" onclick="S.tab='list';render()" style="width:auto">← 返回</button>
+    </div>
+    <div class="notice">品評者掃碼後直接在手機填寫，資料自動集中</div>
+    <div class="card qr-wrap">
+      <img class="qr-img" src="${qr}" alt="QR Code">
+      ${cat?`<div style="margin-top:10px"><span class="tag-cat" style="background:${cat.color}22;color:${cat.color}">${cat.name}${sess.roundNum?' · 第'+sess.roundNum+'次':''}</span></div>`:''}
+      <div style="font-size:15px;font-weight:700;margin-top:8px">${sess.name}</div>
+      ${sess.evalDate?`<div style="font-size:12px;color:var(--muted);margin-top:3px">品評日期：${sess.evalDate}</div>`:''}
+      ${sess.enabledTastes&&sess.enabledTastes.length?`<div style="font-size:12px;color:var(--muted);margin-top:2px">評分項目：${sess.enabledTastes.join('、')}</div>`:''}
+      <div style="font-size:12px;color:var(--muted);margin-top:2px">已收集 ${cnt} 份</div>
+      <div style="margin-top:14px;display:flex;gap:7px;justify-content:center">
+        <a href="${qr}" download="QR_${sess.name}.png"><button class="btn btn-s btn-sm" style="width:auto">↓ 下載</button></a>
+        <button class="btn btn-s btn-sm" onclick="window.print()" style="width:auto">列印</button>
+      </div>
+    </div>
+    <div class="card" style="font-size:12px;color:var(--muted)">
+      <div style="font-weight:700;color:var(--text);margin-bottom:5px">表單連結</div>
+      <div style="word-break:break-all;font-family:monospace;font-size:11px;background:var(--bg);padding:7px;border-radius:var(--radius-s)">${url}</div>
     </div>`;
 }
 
-// 後台數據
-function renderDashboard() {
-  const sid=S.currentSession;
-  const sess=S.sessions[sid];
-  if (!sess) return `<div class="empty">找不到品評資料</div>`;
-
-  const backBtn=`<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
-    <button class="btn btn-s btn-sm" onclick="S.tab='sessions';render()" style="width:auto">← 返回列表</button>
-    <div style="font-weight:700">${sess.product}</div>
-  </div>`;
-
-  if(!S.pinOK){
-    return backBtn+`<div class="overlay">
-      <div class="pin-box">
-        <div class="pin-title">後台數據</div>
-        <div class="pin-sub">${sess.product}</div>
-        <input class="pin-input" type="password" id="pin-inp" placeholder="••••" maxlength="8" onkeydown="if(event.key==='Enter')verifyDashPin()">
-        ${S.pinErr?`<div class="pin-error">PIN 碼錯誤</div>`:''}
-        <button class="btn btn-p" onclick="verifyDashPin()">確認</button>
-      </div>
-    </div>`;
-  }
-
-  const resp=S.responses[sid]||[];
-  const n=resp.length;
-  if(n===0) return backBtn+`<div class="empty">尚無品評資料<br><span style="font-size:13px">請品評者掃碼填寫後再查看</span></div>
-    <button class="btn btn-s btn-sm" onclick="showQR('${sid}')" style="width:auto;margin-top:12px">查看 QR Code</button>`;
-
-  const allKeys=[...FIXED,...(sess.enabledTastes||[])];
+function calcAvgs(resp,allKeys){
   const avgs={};
   allKeys.forEach(k=>{
-    const vals=resp.map(r=>r.scores[k]).filter(v=>v&&v!=='N/A'&&v>0);
+    const vals=resp.map(r=>(r.scores||{})[safeKey(k)]).filter(v=>v&&v!=='N/A'&&v>0);
     avgs[k]=vals.length?vals.reduce((a,b)=>a+b,0)/vals.length:null;
   });
+  return avgs;
+}
+
+function renderSingleDash(sid){
+  const sess=S.sessions[sid];
+  const resp=S.responses[sid]||[];
+  const n=resp.length;
+  const allKeys=[...FIXED,...(sess.enabledTastes||[])];
+  if(n===0)return`<div class="empty">尚無品評資料</div><div style="text-align:center"><button class="btn btn-s btn-sm" onclick="refreshDash()" style="width:auto;margin-top:8px">↻ 重新整理</button></div>`;
+  const avgs=calcAvgs(resp,allKeys);
   const overall=resp.reduce((a,r)=>a+(r.overallLike||0),0)/n;
   const buyPos=resp.filter(r=>['一定會買','可能會買'].includes(r.buyIntent)).length;
   const anomalyN=sess.showAnomaly?resp.filter(r=>r.anomaly===true).length:null;
-
-  return backBtn+`
+  return`
+    <div style="text-align:right;margin-bottom:8px"><button class="btn btn-s btn-sm" onclick="refreshDash()" style="width:auto">↻ 重新整理</button></div>
     <div class="metrics">
       <div class="metric"><div class="metric-val">${n}</div><div class="metric-lbl">品評人數</div></div>
       <div class="metric"><div class="metric-val">${overall.toFixed(1)}</div><div class="metric-lbl">整體喜好</div></div>
       <div class="metric"><div class="metric-val">${Math.round(buyPos/n*100)}%</div><div class="metric-lbl">購買正向率</div></div>
     </div>
-    ${anomalyN!==null?(anomalyN>0?`<div class="tag tag-bad" style="display:block;margin-bottom:12px">⚠ ${anomalyN} 人反映有異味</div>`:`<div class="tag tag-ok" style="display:block;margin-bottom:12px">✓ 無異味反映</div>`):''}
+    ${anomalyN!==null?(anomalyN>0?`<div class="tag tag-bad" style="display:block;margin-bottom:10px">⚠ ${anomalyN} 人反映有異味</div>`:`<div class="tag tag-ok" style="display:block;margin-bottom:10px">✓ 無異味反映</div>`):''}
     <div class="slabel">各項評分</div>
-    <div class="card">
-      ${allKeys.map(k=>{
-        const avg=avgs[k]; if(avg===null) return'';
-        const pct=Math.round((avg/5)*100);
-        const color=avg>=4?'#3A8A50':avg>=3?'#C07010':'#C0392B';
-        return `<div class="bar-item"><div class="bar-lbl">${k}</div><div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${color}"></div></div><div class="bar-score">${avg.toFixed(1)}</div></div>`;
-      }).join('')}
-    </div>
+    <div class="card">${allKeys.map(k=>{const avg=avgs[k];if(avg===null)return'';const pct=Math.round((avg/5)*100),color=avg>=4?'#3A8A50':avg>=3?'#C07010':'#C0392B';return`<div class="bar-item"><div class="bar-lbl">${k}</div><div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${color}"></div></div><div class="bar-score">${avg.toFixed(1)}</div></div>`;}).join('')}</div>
     <div class="slabel">回應明細（${n} 筆）</div>
-    ${resp.slice().reverse().map(r=>{
-      const ne=Object.entries(r.notes||{}).filter(([,v])=>v);
-      return `<div class="rcard">
-        <div class="r-head"><div class="r-name">${r.name}${r.dept?' · '+r.dept:''}</div><div class="r-time">${r.time}</div></div>
-        <div style="font-size:13px;color:var(--muted)">整體喜好 ${r.overallLike}★ ／ ${r.buyIntent||'未填'}${anomalyN!==null?(r.anomaly===true?' ／ <span class="tag tag-bad">有異味</span>':' ／ <span class="tag tag-ok">無異味</span>'):''}
-        </div>
-        ${ne.length||r.finalNote?`<div class="r-notes">
-          ${ne.map(([k,v])=>`<div><strong>${k}：</strong>${v}</div>`).join('')}
-          ${r.finalNote?`<div><strong>整體意見：</strong>${r.finalNote}</div>`:''}
-        </div>`:''}
-      </div>`;
-    }).join('')}
-    <div style="display:flex;gap:8px;margin-top:16px;flex-wrap:wrap">
+    ${resp.slice().reverse().map(r=>{const ne=Object.entries(r.notes||{}).filter(([,v])=>v);return`<div class="rcard">
+      <div class="r-head"><div class="r-name">${r.name||'匿名'}${r.dept?' · '+r.dept:''}</div><div class="r-time">${r.time||''}</div></div>
+      <div style="font-size:12px;color:var(--muted)">整體喜好 ${r.overallLike||0}★ ／ ${r.buyIntent||'未填'}${anomalyN!==null?(r.anomaly===true?' ／ <span class="tag tag-bad">有異味</span>':' ／ <span class="tag tag-ok">無異味</span>'):''}
+      </div>
+      ${ne.length||r.finalNote?`<div class="r-notes">${ne.map(([k,v])=>`<div><strong>${k}：</strong>${v}</div>`).join('')}${r.finalNote?`<div><strong>整體意見：</strong>${r.finalNote}</div>`:''}</div>`:''}
+    </div>`;}).join('')}
+    <div style="display:flex;gap:6px;margin-top:12px;flex-wrap:wrap">
       <button class="btn btn-s btn-sm" onclick="exportCSV('${sid}')" style="width:auto">↓ 匯出 CSV</button>
-      <button class="btn btn-d btn-sm" onclick="clearResponses('${sid}')" style="width:auto">清除數據</button>
+      <button class="btn btn-d btn-sm" onclick="clearRespFn('${sid}')" style="width:auto">清除數據</button>
     </div>`;
 }
 
-async function clearResponses(sid) {
-  if(!confirm('確定清除此品評的所有數據？')) return;
-  await fbRemove(`responses/${sid}`);
-  render();
+function renderTrendDash(catId){
+  // 取得該分類下所有品評，按 roundNum 排序
+  const siblings=sessInCat(catId).filter(([sid])=>S.responses[sid]&&S.responses[sid].length>0);
+  if(siblings.length<2)return`<div class="empty">需要至少 2 次品評有數據才能顯示趨勢</div>`;
+  const allKeys=[...FIXED,...(()=>{const s=S.sessions[siblings[0][0]];return s.enabledTastes||[];})()];
+  // 選取要顯示的 key
+  const activeKey=S.trendKey||allKeys[0];
+  const points=siblings.map(([sid,sess])=>{
+    const resp=S.responses[sid]||[];
+    const avg=calcAvgs(resp,[activeKey])[activeKey];
+    return{label:`第${sess.roundNum||'?'}次`,name:sess.name,avg,n:resp.length};
+  });
+  // SVG 趨勢圖
+  const W=Math.max(300,siblings.length*60+60),H=160;
+  const maxY=5,minY=1,padL=40,padR=20,padT=20,padB=30;
+  const xStep=(W-padL-padR)/(points.length-1||1);
+  function toX(i){return padL+i*xStep;}
+  function toY(v){return padT+(maxY-v)/(maxY-minY)*(H-padT-padB);}
+  let path='',dots='';
+  points.forEach((pt,i)=>{
+    if(pt.avg===null)return;
+    const x=toX(i),y=toY(pt.avg);
+    path+=(i===0?`M${x},${y}`:`L${x},${y}`);
+    dots+=`<circle cx="${x}" cy="${y}" r="5" fill="#2D5A3D"/>
+      <text x="${x}" y="${y-10}" text-anchor="middle" font-size="11" fill="#2D5A3D" font-weight="700">${pt.avg.toFixed(1)}</text>`;
+  });
+  const gridLines=[1,2,3,4,5].map(v=>`<line x1="${padL}" y1="${toY(v)}" x2="${W-padR}" y2="${toY(v)}" stroke="#E8E5DF" stroke-width="1"/>
+    <text x="${padL-5}" y="${toY(v)+4}" text-anchor="end" font-size="10" fill="#A8A8A5">${v}</text>`).join('');
+  const xLabels=points.map((pt,i)=>`<text x="${toX(i)}" y="${H-5}" text-anchor="middle" font-size="10" fill="#6B6B68">${pt.label}</text>`).join('');
+  const svg=`<svg class="trend-svg" viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" xmlns="http://www.w3.org/2000/svg">
+    ${gridLines}
+    <path d="${path}" fill="none" stroke="#2D5A3D" stroke-width="2.5" stroke-linejoin="round"/>
+    ${dots}${xLabels}
+  </svg>`;
+  return`
+    <div class="slabel">趨勢分析</div>
+    <div class="card">
+      <div style="font-size:12px;color:var(--muted);margin-bottom:8px">選擇評分項目：</div>
+      <div class="trend-tabs">${allKeys.map(k=>`<button class="trend-tab ${activeKey===k?'active':''}" onclick="S.trendKey='${k}';render()">${k}</button>`).join('')}</div>
+      <div class="trend-wrap">${svg}</div>
+    </div>
+    <div class="slabel">各次品評摘要</div>
+    ${siblings.map(([sid,sess])=>{
+      const resp=S.responses[sid]||[];
+      const overall=resp.length?resp.reduce((a,r)=>a+(r.overallLike||0),0)/resp.length:null;
+      return`<div class="round-row" onclick="S.currentSessId='${sid}';S.dashView='single';render()">
+        <div class="round-num">${sess.roundNum||'?'}</div>
+        <div class="round-info">
+          <div class="round-name">${sess.name}</div>
+          <div class="round-meta">${sess.evalDate?sess.evalDate:''}${overall!==null?' · 整體喜好 '+overall.toFixed(1)+'★':''}</div>
+        </div>
+        <span class="round-count">${resp.length} 份</span>
+      </div>`;
+    }).join('')}
+    <div style="margin-top:12px;display:flex;gap:6px;flex-wrap:wrap">
+      <button class="btn btn-s btn-sm" onclick="exportTrendCSV('${catId}')" style="width:auto">↓ 匯出全部次數 CSV</button>
+      <button class="btn btn-s btn-sm" onclick="exportTrendSummary('${catId}')" style="width:auto">↓ 匯出趨勢摘要 CSV</button>
+    </div>`;
 }
 
-function exportCSV(sid) {
+function renderDashboard(){
+  const sid=S.currentSessId;
   const sess=S.sessions[sid];
-  const resp=S.responses[sid]||[];
+  if(!sess)return`<div class="empty">找不到品評資料</div>`;
+  const cat=S.categories[sess.catId];
+  const color=cat?.color||'#374151';
+  const siblings=sessInCat(sess.catId);
+  const hasTrend=siblings.filter(([s])=>S.responses[s]&&S.responses[s].length>0).length>=2;
+
+  if(!S.pinOK){
+    setTimeout(()=>{const el=document.getElementById('pin-inp');if(el)el.focus();},100);
+    return`
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+        <button class="btn btn-s btn-sm" onclick="S.tab='list';render()" style="width:auto">← 返回</button>
+      </div>
+      <div class="pin-page">
+        <div style="font-size:14px;font-weight:700;margin-bottom:3px">${sess.name}</div>
+        ${cat?`<div style="margin-bottom:14px"><span class="tag-cat" style="background:${color}22;color:${color}">${cat.name}${sess.roundNum?' · 第'+sess.roundNum+'次':''}</span></div>`:''}
+        <div style="font-size:13px;color:var(--muted);margin-bottom:14px">請輸入管理員 PIN 碼</div>
+        <input type="password" id="pin-inp" placeholder="••••" maxlength="8" onkeydown="if(event.key==='Enter')verifyDashPin()" class="pin-input" style="width:150px;display:block;margin:0 auto 10px">
+        ${S.pinErr?`<div class="pin-error">PIN 碼錯誤</div>`:''}
+        <button class="btn btn-p" onclick="verifyDashPin()" style="width:150px;margin:0 auto">確認</button>
+      </div>`;
+  }
+
+  const backBtn=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+    <div style="display:flex;align-items:center;gap:8px">
+      <button class="btn btn-s btn-sm" onclick="S.tab='list';render()" style="width:auto">← 列表</button>
+      <div>
+        <div style="font-weight:700;font-size:14px">${sess.name}</div>
+        ${cat?`<span class="tag-cat" style="background:${color}22;color:${color};margin-top:2px;display:inline-block">${cat.name}${sess.roundNum?' · 第'+sess.roundNum+'次':''}</span>`:''}
+      </div>
+    </div>
+    ${hasTrend?`<div style="display:flex;gap:4px">
+      <button class="btn btn-xs ${S.dashView==='single'?'btn-p':'btn-s'}" onclick="S.dashView='single';render()" style="width:auto">單次</button>
+      <button class="btn btn-xs ${S.dashView==='trend'?'btn-p':'btn-s'}" onclick="S.dashView='trend';render()" style="width:auto">趨勢</button>
+    </div>`:''}
+  </div>`;
+
+  return backBtn+(S.dashView==='trend'?renderTrendDash(sess.catId):renderSingleDash(sid));
+}
+
+function exportCSV(sid){
+  const sess=S.sessions[sid],resp=S.responses[sid]||[];
   const keys=[...FIXED,...(sess.enabledTastes||[])];
-  const h=['姓名','部門','時間','整體喜好','購買意願',
-    ...(sess.showAnomaly?['是否有異味']:[]),
-    ...keys.map(k=>k+'評分'),...keys.map(k=>k+'意見'),'整體意見'];
-  const rows=resp.map(r=>[
-    r.name,r.dept,r.time,r.overallLike,r.buyIntent||'',
-    ...(sess.showAnomaly?[r.anomaly===true?'有':r.anomaly===false?'無':'']:[]),
-    ...keys.map(k=>r.scores[k]||''),...keys.map(k=>(r.notes&&r.notes[k])||''),r.finalNote||''
-  ]);
+  const h=['姓名','部門','時間','整體喜好','購買意願',...(sess.showAnomaly?['是否有異味']:[]),...keys.map(k=>k+'評分'),...keys.map(k=>k+'意見'),'整體意見'];
+  const rows=resp.map(r=>[r.name,r.dept,r.time,r.overallLike,r.buyIntent||'',...(sess.showAnomaly?[r.anomaly===true?'有':r.anomaly===false?'無':'']:[]),...keys.map(k=>(r.scores||{})[safeKey(k)]||''),...keys.map(k=>(r.notes&&r.notes[safeKey(k)])||''),r.finalNote||'']);
   const csv=[h,...rows].map(r=>r.map(v=>`"${String(v||'').replace(/"/g,'""')}"`).join(',')).join('\n');
   const a=document.createElement('a');
   a.href=URL.createObjectURL(new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'}));
-  a.download=`品評_${sess.product}_${new Date().toLocaleDateString('zh-TW')}.csv`;
+  a.download=`品評_${sess.catName||''}_${sess.name}_${new Date().toLocaleDateString('zh-TW')}.csv`;
   a.click();
 }
 
-// ── Header ──
-function updateHeader() {
-  const sid=S.sessionId;
-  const cfg=S.sessionSetup;
-  if (S.adminOK) {
-    document.getElementById('h-title').textContent='品評管理後台';
-    document.getElementById('h-sub').textContent='管理員模式';
-  } else if (cfg) {
-    document.getElementById('h-title').textContent=cfg.product||'品評表單';
-    document.getElementById('h-sub').textContent=cfg.evalDate?`品評日期：${cfg.evalDate}`:'歡迎參與品評';
-  } else {
-    document.getElementById('h-title').textContent='品評表單';
-    document.getElementById('h-sub').textContent='載入中...';
-  }
+// 趨勢匯出：所有次數的原始回應合併（加上「第幾次」欄位）
+function exportTrendCSV(catId){
+  const cat=S.categories[catId];
+  const siblings=sessInCat(catId).filter(([sid])=>S.responses[sid]&&S.responses[sid].length>0);
+  if(siblings.length===0){alert('尚無數據可匯出');return;}
+  // 收集所有出現過的 keys
+  const keySet=new Set([...FIXED]);
+  siblings.forEach(([sid,sess])=>(sess.enabledTastes||[]).forEach(t=>keySet.add(t)));
+  const keys=[...keySet];
+  const h=['次數','品評名稱','品評日期','姓名','部門','時間','整體喜好','購買意願','是否有異味',...keys.map(k=>k+'評分'),...keys.map(k=>k+'意見'),'整體意見'];
+  const rows=[];
+  siblings.forEach(([sid,sess])=>{
+    (S.responses[sid]||[]).forEach(r=>{
+      rows.push([
+        sess.roundNum||'',sess.name,sess.evalDate||'',
+        r.name,r.dept,r.time,r.overallLike,r.buyIntent||'',
+        r.anomaly===true?'有':r.anomaly===false?'無':'',
+        ...keys.map(k=>(r.scores||{})[safeKey(k)]||''),
+        ...keys.map(k=>(r.notes&&r.notes[safeKey(k)])||''),
+        r.finalNote||''
+      ]);
+    });
+  });
+  const csv=[h,...rows].map(r=>r.map(v=>`"${String(v||'').replace(/"/g,'""')}"`).join(',')).join('\n');
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'}));
+  a.download=`趨勢_全部回應_${cat?.name||''}_${new Date().toLocaleDateString('zh-TW')}.csv`;
+  a.click();
 }
 
-// ── Main render ──
-function render() {
-  const nav=document.getElementById('nav');
-  if (S.adminOK) {
-    nav.style.display='';
-    const adminTabs=[
-      {id:'sessions',label:'📋 品評列表'},
-      {id:'edit',label:'✎ 編輯',hide:!S.editSession},
-      {id:'qr',label:'▣ QR碼',hide:!_qrSessionId},
-      {id:'dashboard',label:'◉ 後台',hide:!S.currentSession}
-    ].filter(t=>!t.hide);
-    nav.innerHTML=adminTabs.map(t=>`<button class="nav-btn ${S.tab===t.id?'active':''}" onclick="S.tab='${t.id}';render();scrollTo(0,0)">${t.label}</button>`).join('')
-      +`<button class="nav-btn danger" onclick="exitAdmin()" style="margin-left:auto">✕ 離開</button>`;
-  } else {
-    nav.style.display='none';
-  }
+// 趨勢摘要：每次品評的各項平均分（一次一行，適合做圖表）
+function exportTrendSummary(catId){
+  const cat=S.categories[catId];
+  const siblings=sessInCat(catId).filter(([sid])=>S.responses[sid]&&S.responses[sid].length>0);
+  if(siblings.length===0){alert('尚無數據可匯出');return;}
+  const keySet=new Set([...FIXED]);
+  siblings.forEach(([sid,sess])=>(sess.enabledTastes||[]).forEach(t=>keySet.add(t)));
+  const keys=[...keySet];
+  const h=['次數','品評名稱','品評日期','回應人數','整體喜好均分','購買正向率(%)','有異味人數',...keys.map(k=>k+'均分')];
+  const rows=siblings.map(([sid,sess])=>{
+    const resp=S.responses[sid]||[];
+    const n=resp.length;
+    const overall=n?resp.reduce((a,r)=>a+(r.overallLike||0),0)/n:0;
+    const buyPos=resp.filter(r=>['一定會買','可能會買'].includes(r.buyIntent)).length;
+    const anomaly=resp.filter(r=>r.anomaly===true).length;
+    const avgs=calcAvgs(resp,keys);
+    return[
+      sess.roundNum||'',sess.name,sess.evalDate||'',n,
+      overall?overall.toFixed(2):'',
+      n?Math.round(buyPos/n*100):'',
+      anomaly,
+      ...keys.map(k=>avgs[k]!==null?avgs[k].toFixed(2):'')
+    ];
+  });
+  const csv=[h,...rows].map(r=>r.map(v=>`"${String(v||'').replace(/"/g,'""')}"`).join(',')).join('\n');
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8'}));
+  a.download=`趨勢_摘要均分_${cat?.name||''}_${new Date().toLocaleDateString('zh-TW')}.csv`;
+  a.click();
+}
 
+function updateHeader(){
+  const cfg=S.sessionSetup;
+  if(S.adminOK){document.getElementById('h-title').textContent='品評管理後台';document.getElementById('h-sub').textContent='管理員模式';}
+  else if(cfg){document.getElementById('h-title').textContent=cfg.name||'品評表單';document.getElementById('h-sub').textContent=cfg.catName?(cfg.catName+(cfg.roundNum?' · 第'+cfg.roundNum+'次':'')):'歡迎參與品評';}
+  else{document.getElementById('h-title').textContent='品評表單';document.getElementById('h-sub').textContent='載入中...';}
+}
+
+function render(){
+  const nav=document.getElementById('nav');
+  if(S.adminOK){
+    nav.style.display='';
+    const tabs=[
+      {id:'list',label:'📋 品評列表'},
+      {id:'editcat',label:'✎ 分類',hide:!S.editCat},
+      {id:'editsess',label:'✎ 品評',hide:!S.editSess},
+      {id:'qr',label:'▣ QR碼',hide:!S.qrSessId},
+      {id:'dashboard',label:'◉ 後台',hide:!S.currentSessId}
+    ].filter(t=>!t.hide);
+    nav.innerHTML=tabs.map(t=>`<button class="nav-btn ${S.tab===t.id?'active':''}" onclick="S.tab='${t.id}';render();scrollTo(0,0)">${t.label}</button>`).join('')
+      +`<button class="nav-btn red" onclick="exitAdmin()">✕ 離開</button>`;
+  }else{nav.style.display='none';}
   updateHeader();
   const c=document.getElementById('content');
   let html='';
-  if(S.adminPrompt) html+=renderAdminPrompt();
+  if(S.adminPrompt)html+=renderAdminPrompt();
   if(S.adminOK){
-    if(S.tab==='sessions') html+=renderSessions();
-    else if(S.tab==='edit') html+=renderEdit();
-    else if(S.tab==='qr') html+=renderQR();
-    else if(S.tab==='dashboard') html+=renderDashboard();
-  } else {
-    html+=renderForm();
-  }
+    if(S.tab==='list')html+=renderList();
+    else if(S.tab==='editcat')html+=renderEditCat();
+    else if(S.tab==='editsess')html+=renderEditSess();
+    else if(S.tab==='qr')html+=renderQR();
+    else if(S.tab==='dashboard')html+=renderDashboard();
+  }else html+=renderForm();
   c.innerHTML=html;
 }
 
-// ── Init ──
-document.addEventListener('firebase-ready', () => {
-  fb=true;
-  const sid=getSessionId();
-  if (sid) {
+async function init(){
+  loadPin();
+  const sid=getSid();
+  if(sid){
     S.sessionId=sid;
-    listenSessionSetup(sid);
-  } else {
-    // 沒有 session id：顯示提示
-    S.sessionSetup=null;
+    loadSessionSetup(sid);
+  }else{
+    S.sessionSetup=null;updateHeader();render();
   }
-  listenSessions();
-  listenAllResponses();
-  render();
-});
-
-loadAdminPin();
-render();
-setTimeout(()=>{ if(!fb) render(); },1500);
+  loadAll().then(()=>{if(S.adminOK)render();});
+}
+init();
 </script>
 </body>
 </html>
