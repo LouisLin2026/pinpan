@@ -284,7 +284,51 @@ function setNoteVal(k,v){S.form.notes[k]=v;}
 function setOverall(v){S.form.overallLike=S.form.overallLike===v?0:v;render();}
 function setAnomalyVal(v){S.form.anomaly=S.form.anomaly===v?null:v;render();}
 function setIntent(v){S.form.buyIntent=S.form.buyIntent===v?null:v;render();}
-function nextPage(){const p=getPages();if(S.form.page<p.length-1){S.form.page++;render();scrollTo(0,0);}}
+function nextPage(){
+  const p=getPages();
+  if(S.form.page<p.length-1){
+    // 驗證當前頁必填
+    if(!validatePage(S.form.page)) return;
+    S.form.page++;render();scrollTo(0,0);
+  }
+}
+
+function validatePage(page){
+  const cfg=S.sessionSetup;
+  const pages=getPages();
+  const isLast=page===pages.length-1;
+
+  if(page===0){
+    if(!S.form.name.trim()){alert('請填寫姓名');return false;}
+    if(!S.form.dept.trim()){alert('請選擇或填寫部門');return false;}
+    return true;
+  }
+
+  if(page===1){
+    // 固定評分：氣味/香氣、口感/酥脆、口感/黏牙
+    for(const q of FIXED){
+      const sc=S.form.scores[q];
+      if(!sc||sc===0){alert(`請評分「${q}」（或選 N/A）`);return false;}
+    }
+    return true;
+  }
+
+  if(!isLast){
+    // 滋味評分頁
+    const taste=(cfg.enabledTastes||[])[page-2];
+    if(taste){
+      const sc=S.form.scores[taste];
+      if(!sc||sc===0){alert(`請評分「${taste}度」（或選 N/A）`);return false;}
+    }
+    return true;
+  }
+
+  // 最後一頁：整體評估
+  if(!S.form.overallLike||S.form.overallLike===0){alert('請評分「整體喜好」');return false;}
+  if(!S.form.buyIntent){alert('請選擇「購買意願」');return false;}
+  if(cfg.showAnomaly&&S.form.anomaly===null){alert('請選擇「是否有異味」');return false;}
+  return true;
+}
 function prevPage(){if(S.form.page>0){S.form.page--;render();scrollTo(0,0);}}
 
 async function submitForm(){
@@ -292,6 +336,7 @@ async function submitForm(){
   if(!sid){alert('找不到品評資訊，請重新掃碼');return;}
   if(!S.form.name.trim()){alert('請填寫姓名');return;}
   if(!S.form.dept.trim()){alert('請選擇或填寫部門');return;}
+  if(!validatePage(S.form.page)){return;}
   function sanitize(obj){const r={};Object.entries(obj||{}).forEach(([k,v])=>{r[safeKey(k)]=v;});return r;}
   const resp={
     name:S.form.name||'匿名',dept:S.form.dept,
@@ -327,7 +372,7 @@ function starBlock(key,label,allowNA){
   let stars='';
   for(let i=1;i<=5;i++)stars+=`<span class="star ${!isNA&&sc>=i?'lit':''}" onclick="setScore('${key}',${i})">★</span>`;
   return `<div class="star-block">
-    <div class="star-q">${label}</div>
+    <div class="star-q">${label} <span style="color:var(--danger);font-size:12px">*</span></div>
     <div class="star-row"><div class="stars">${stars}</div>${allowNA?`<button class="na-btn ${isNA?'on':''}" onclick="setNA('${key}')">N/A</button>`:''}</div>
     <div class="note-hint">意見（選填）</div>
     <textarea class="note-input" rows="2" placeholder="輸入意見..." oninput="setNoteVal('${key}',this.value)">${S.form.notes[key]||''}</textarea>
