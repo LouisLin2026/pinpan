@@ -36,8 +36,8 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
 .stars{display:flex;gap:3px}
 .star{font-size:26px;cursor:pointer;color:#DDD;user-select:none;line-height:1}
 .star.lit{color:var(--star)}
-.na-btn{font-size:11px;padding:3px 8px;border:1px solid var(--border);border-radius:20px;cursor:pointer;color:var(--muted);background:none;font-family:inherit}
-.na-btn.on{background:var(--border)}
+.na-btn{font-size:12px;font-weight:600;padding:6px 14px;border:2px solid var(--border-s);border-radius:20px;cursor:pointer;color:var(--muted);background:var(--bg);font-family:inherit;transition:all .15s}
+.na-btn.on{background:#374151;color:#fff;border-color:#374151;box-shadow:0 1px 4px rgba(0,0,0,.2)}
 .note-hint{font-size:12px;color:var(--hint);margin:5px 0 3px}
 .note-input{width:100%;padding:7px 10px;border:1px solid var(--border);border-radius:var(--radius-s);font-family:inherit;font-size:13px;background:var(--bg);color:var(--text);resize:none}
 .note-input:focus{outline:none;border-color:var(--accent)}
@@ -298,9 +298,7 @@ async function deleteSessFn(id){
 
 // ── Form ──
 function getPages(){
-  const cfg=S.sessionSetup;
-  if(!cfg)return['填寫'];
-  return['基本資訊','固定評分',...(cfg.enabledTastes||[]).map(t=>t+'評分'),'整體評估'];
+  return['基本資料','品評評分','喜好與回饋'];
 }
 function setScore(k,v){S.form.scores[k]=S.form.scores[k]===v?0:v;render();}
 function setNA(k){S.form.scores[k]=S.form.scores[k]==='N/A'?0:'N/A';render();}
@@ -319,38 +317,26 @@ function nextPage(){
 
 function validatePage(page){
   const cfg=S.sessionSetup;
-  const pages=getPages();
-  const isLast=page===pages.length-1;
-
   if(page===0){
     if(!S.form.name.trim()){alert('請填寫姓名');return false;}
     if(!S.form.dept.trim()){alert('請選擇或填寫部門');return false;}
     return true;
   }
-
   if(page===1){
-    // 固定評分：氣味/香氣、口感/酥脆、口感/黏牙
     for(const q of FIXED){
       const sc=S.form.scores[q];
-      if(!sc||sc===0){alert(`請評分「${q}」（或選 N/A）`);return false;}
+      if(!sc||sc===0){alert('請評分「'+q+'」（或選「不適用」）');return false;}
+    }
+    for(const t of (cfg.enabledTastes||[])){
+      const sc=S.form.scores[t];
+      if(!sc||sc===0){alert('請評分「'+t+'度」（或選「不適用」）');return false;}
     }
     return true;
   }
-
-  if(!isLast){
-    // 滋味評分頁
-    const taste=(cfg.enabledTastes||[])[page-2];
-    if(taste){
-      const sc=S.form.scores[taste];
-      if(!sc||sc===0){alert(`請評分「${taste}度」（或選 N/A）`);return false;}
-    }
-    return true;
-  }
-
-  // 最後一頁：整體評估
+  // 最後一頁
   if(!S.form.overallLike||S.form.overallLike===0){alert('請評分「整體喜好」');return false;}
   if(!S.form.buyIntent){alert('請選擇「購買意願」');return false;}
-  if(cfg.showAnomaly&&S.form.anomaly===null){alert('請選擇「是否有異味」');return false;}
+  if(cfg&&cfg.showAnomaly&&S.form.anomaly===null){alert('請選擇「是否有異味」');return false;}
   return true;
 }
 function prevPage(){if(S.form.page>0){S.form.page--;render();scrollTo(0,0);}}
@@ -397,9 +383,7 @@ function starBlock(key,label,allowNA){
   for(let i=1;i<=5;i++)stars+=`<span class="star ${!isNA&&sc>=i?'lit':''}" onclick="setScore('${key}',${i})">★</span>`;
   return `<div class="star-block">
     <div class="star-q">${label} <span style="color:var(--danger);font-size:12px">*</span></div>
-    <div class="star-row"><div class="stars">${stars}</div>${allowNA?`<button class="na-btn ${isNA?'on':''}" onclick="setNA('${key}')">N/A</button>`:''}</div>
-    <div class="note-hint">意見（選填）</div>
-    <textarea class="note-input" rows="2" placeholder="輸入意見..." oninput="setNoteVal('${key}',this.value)">${S.form.notes[key]||''}</textarea>
+    <div class="star-row"><div class="stars">${stars}</div>${allowNA?`<button class="na-btn ${isNA?'on':''}" onclick="setNA('${key}')">${isNA?'✓ 不適用':'不適用'}</button>`:''}</div>
   </div>`;
 }
 
@@ -532,7 +516,7 @@ function renderForm(){
   if(p===0){
     const depts=['研發部','品保部','行銷部','產品課'];
     const isOther=S.form.dept&&!depts.includes(S.form.dept);
-    body=`<div class="slabel">基本資訊</div><div class="card">
+    body=`<div class="slabel">基本資料</div><div class="card">
       <div class="field"><label>姓名 *</label><input type="text" value="${S.form.name}" placeholder="您的姓名" oninput="S.form.name=this.value"></div>
       <div class="field">
         <label>部門 *</label>
@@ -552,24 +536,41 @@ function renderForm(){
       ${cfg.catName?`<div style="font-size:12px;color:var(--hint);margin-top:2px">分類：${cfg.catName}${cfg.roundNum?' · 第'+cfg.roundNum+'次':''}</div>`:''}
     </div>`;
   }else if(p===1){
-    body=`<div class="slabel">固定評分</div><div class="card">${FIXED.map((q,i)=>(i?'<hr class="divider">':'')+starBlock(q,q,true)).join('')}</div>`;
-  }else if(!isLast){
-    const taste=(cfg.enabledTastes||[])[p-2];
-    body=`<div class="slabel">${taste} 滋味評分</div><div class="card">${starBlock(taste,taste+'度',true)}</div>`;
+    const tastes=(cfg.enabledTastes||[]);
+    const tasteSection=tastes.length?`<hr class="divider">
+      <div class="slabel" style="margin-top:8px;margin-bottom:10px">滋味評分</div>
+      ${tastes.map((t,i)=>(i?'<hr class="divider">':'')+starBlock(t,t+'度',true)).join('')}`:'';
+    const anomalySection=cfg.showAnomaly?`<hr class="divider">
+      <div class="slabel" style="margin-top:8px;margin-bottom:10px">異味</div>
+      <div class="star-block">
+        <div class="star-q">是否有異味？ <span style="color:var(--danger);font-size:12px">*</span></div>
+        <div class="choice-group" style="margin-top:6px">
+          <button class="choice-btn ${S.form.anomaly===false?'sel':''}" onclick="setAnomalyVal(false)">✓ 無異味</button>
+          <button class="choice-btn red ${S.form.anomaly===true?'sel':''}" onclick="setAnomalyVal(true)">✗ 有異味</button>
+        </div>
+      </div>`:'';
+    body=`<div class="slabel">固定評分</div>
+    <div class="card">
+      ${FIXED.map((q,i)=>(i?'<hr class="divider">':'')+starBlock(q,q,true)).join('')}
+      ${tasteSection}
+      ${anomalySection}
+    </div>`;
   }else{
     body=`<div class="slabel">整體評估</div><div class="card">
-      <div class="star-q">整體喜好</div>
-      <div class="stars" style="margin-bottom:14px">${[1,2,3,4,5].map(i=>`<span class="star ${S.form.overallLike>=i?'lit':''}" onclick="setOverall(${i})">★</span>`).join('')}</div>
+      <div class="star-block">
+        <div class="star-q">整體喜好 <span style="color:var(--danger);font-size:12px">*</span></div>
+        <div class="stars" style="margin-top:6px;margin-bottom:4px">${[1,2,3,4,5].map(i=>`<span class="star ${S.form.overallLike>=i?'lit':''}" onclick="setOverall(${i})">★</span>`).join('')}</div>
+      </div>
       <hr class="divider">
-      <div class="star-q">購買意願</div>
-      <div class="choice-group" style="margin-bottom:14px">${['一定會買','可能會買','猶豫中','可能不買','不會買'].map(v=>`<button class="choice-btn ${S.form.buyIntent===v?'sel':''}" onclick="setIntent('${v}')">${v}</button>`).join('')}</div>
-      ${cfg.showAnomaly?`<hr class="divider"><div class="star-q">是否有異味？</div>
-      <div class="choice-group" style="margin-bottom:14px">
-        <button class="choice-btn ${S.form.anomaly===false?'sel':''}" onclick="setAnomalyVal(false)">✓ 無異味</button>
-        <button class="choice-btn red ${S.form.anomaly===true?'sel':''}" onclick="setAnomalyVal(true)">✗ 有異味</button>
-      </div>`:''}
-      <hr class="divider"><div class="star-q">整體意見</div>
-      <textarea class="note-input" rows="3" placeholder="整體感受、建議..." oninput="S.form.finalNote=this.value" style="margin-top:4px">${S.form.finalNote}</textarea>
+      <div class="star-block">
+        <div class="star-q">購買意願 <span style="color:var(--danger);font-size:12px">*</span></div>
+        <div class="choice-group" style="margin-top:6px">${['一定會買','可能會買','猶豫中','可能不買','不會買'].map(v=>`<button class="choice-btn ${S.form.buyIntent===v?'sel':''}" onclick="setIntent('${v}')">${v}</button>`).join('')}</div>
+      </div>
+      <hr class="divider">
+      <div class="star-block">
+        <div class="star-q">整體意見回饋 <span style="font-size:11px;color:var(--hint);font-weight:400">（選填）</span></div>
+        <textarea class="note-input" rows="4" placeholder="整體感受、建議..." oninput="S.form.finalNote=this.value" style="margin-top:6px">${S.form.finalNote}</textarea>
+      </div>
     </div>`;
   }
   return body+`<div class="page-nav">
@@ -605,7 +606,8 @@ function renderQR(){
     </div>
     <div class="card" style="font-size:12px;color:var(--muted)">
       <div style="font-weight:700;color:var(--text);margin-bottom:5px">表單連結</div>
-      <div style="word-break:break-all;font-family:monospace;font-size:11px;background:var(--bg);padding:7px;border-radius:var(--radius-s)">${url}</div>
+      <div style="word-break:break-all;font-family:monospace;font-size:11px;background:var(--bg);padding:7px;border-radius:var(--radius-s);margin-bottom:8px">${url}</div>
+      <button class="btn btn-s btn-sm" id="copy-url-btn" onclick="navigator.clipboard.writeText('${url}').then(()=>{const b=document.getElementById('copy-url-btn');b.textContent='✓ 已複製';b.style.color='var(--accent)';setTimeout(()=>{b.textContent='複製連結';b.style.color='';},2000);})" style="width:auto">複製連結</button>
     </div>`;
 }
 
