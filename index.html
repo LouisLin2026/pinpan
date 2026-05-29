@@ -177,13 +177,37 @@ function headerTap(){
   tapT=setTimeout(()=>tapN=0,2000);
   if(tapN>=5){tapN=0;S.adminPrompt=true;render();}
 }
+function renderLogin(){
+  return`
+    <div style="text-align:center;padding:48px 20px 32px">
+      <div style="width:64px;height:64px;background:var(--accent-l);border-radius:50%;margin:0 auto 16px;display:flex;align-items:center;justify-content:center">
+        <span style="font-size:28px">🏷️</span>
+      </div>
+      <div style="font-size:18px;font-weight:700;margin-bottom:4px">品評表單系統</div>
+      <div style="font-size:13px;color:var(--muted);margin-bottom:32px">請輸入管理員 PIN 碼進入後台</div>
+      <input type="password" id="adm-pin" placeholder="••••" maxlength="8"
+        onkeydown="if(event.key==='Enter')verifyAdmin()"
+        style="width:180px;display:block;margin:0 auto 10px;padding:14px;text-align:center;font-size:22px;letter-spacing:.3em;border:1px solid var(--border);border-radius:var(--radius-s);font-family:inherit;background:var(--bg)">
+      ${S.adminErr?`<div style="font-size:12px;color:var(--danger);margin-bottom:8px">PIN 碼錯誤，請再試一次</div>`:''}
+      <button class="btn btn-p" onclick="verifyAdmin()" style="width:180px;margin:0 auto">進入後台</button>
+      <div style="margin-top:32px;padding-top:20px;border-top:1px solid var(--border)">
+        <div style="font-size:12px;color:var(--hint)">品評者請掃描現場 QR Code 填寫表單</div>
+      </div>
+    </div>`;
+}
+
 function verifyAdmin(){
   const el=document.getElementById('adm-pin');if(!el)return;
-  if(el.value===S.adminPin){S.adminOK=true;S.adminPrompt=false;S.adminErr=false;S.tab='list';}
-  else S.adminErr=true;
+  if(el.value===S.adminPin){
+    S.adminOK=true;S.adminPrompt=false;S.adminErr=false;
+    S.tab='list';
+    loadAll().then(()=>render());
+  } else {
+    S.adminErr=true;
+  }
   render();
 }
-function exitAdmin(){S.adminOK=false;S.tab='form';render();scrollTo(0,0);}
+function exitAdmin(){S.adminOK=false;S.tab='login';render();scrollTo(0,0);}
 
 // ── Load ──
 async function loadAll(){
@@ -805,6 +829,7 @@ function exportTrendSummary(catId){
 function updateHeader(){
   const cfg=S.sessionSetup;
   if(S.adminOK){document.getElementById('h-title').textContent='品評管理後台';document.getElementById('h-sub').textContent='管理員模式';}
+  else if(S.tab==='login'){document.getElementById('h-title').textContent='品評表單系統';document.getElementById('h-sub').textContent='管理員後台';}
   else if(cfg){document.getElementById('h-title').textContent=cfg.name||'品評表單';document.getElementById('h-sub').textContent=cfg.catName?(cfg.catName+(cfg.roundNum?' · 第'+cfg.roundNum+'次':'')):'歡迎參與品評';}
   else{document.getElementById('h-title').textContent='品評表單';document.getElementById('h-sub').textContent='載入中...';}
 }
@@ -833,7 +858,11 @@ function render(){
     else if(S.tab==='editsess')html+=renderEditSess();
     else if(S.tab==='qr')html+=renderQR();
     else if(S.tab==='dashboard')html+=renderDashboard();
-  }else html+=renderForm();
+  } else if(S.tab==='login'){
+    html+=renderLogin();
+  } else {
+    html+=renderForm();
+  }
   c.innerHTML=html;
 }
 
@@ -841,10 +870,15 @@ async function init(){
   loadPin();
   const sid=getSid();
   if(sid){
+    // 品評者模式：有 session ID，載入表單
     S.sessionId=sid;
+    S.tab='form';
+    render(); // 先顯示載入中
     loadSessionSetup(sid);
   }else{
-    S.sessionSetup=null;updateHeader();render();
+    // 無 session ID：直接顯示管理員登入
+    S.tab='login';
+    render();
   }
   loadAll().then(()=>{if(S.adminOK)render();});
 }
