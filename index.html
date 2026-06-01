@@ -207,17 +207,34 @@ function headerTap(){
 // ══════════════════════════════════════════
 // 🐠 AI 分析核心
 // ══════════════════════════════════════════
+// Cloudflare Worker 中繼 URL（解決 CORS 問題）
+// 若有設定 Worker，AI 分析透過中繼呼叫；若無則直接呼叫（在 claude.ai 內可用）
+const CLAUDE_PROXY = localStorage.getItem('bfy_claude_proxy') || '';
+
 async function callClaude(system, user, maxTokens=1200){
-  const res = await fetch('https://api.anthropic.com/v1/messages',{
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({
-      model:'claude-sonnet-4-20250514',
-      max_tokens: maxTokens,
-      system,
-      messages:[{role:'user', content: user}]
-    })
-  });
+  const payload = {
+    model:'claude-sonnet-4-20250514',
+    max_tokens: maxTokens,
+    system,
+    messages:[{role:'user', content: user}]
+  };
+
+  let res;
+  if(CLAUDE_PROXY){
+    // 透過 Cloudflare Worker 中繼
+    res = await fetch(CLAUDE_PROXY+'/claude',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','X-Api-Key':''},
+      body:JSON.stringify(payload)
+    });
+  } else {
+    // 直接呼叫（在 claude.ai Artifact 或 GitHub Pages 環境可用）
+    res = await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify(payload)
+    });
+  }
   const data = await res.json();
   return (data.content||[]).map(c=>c.text||'').join('');
 }
