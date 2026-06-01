@@ -118,36 +118,36 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
 .pin-error{font-size:12px;color:var(--danger);margin-bottom:7px}
 
 /* ══ 🐠 小福 AI 分析 ══ */
-.ai-panel{background:var(--purple-l);border:1px solid #DDD6FE;border-radius:var(--radius);padding:14px 16px;margin-bottom:14px}
+
 .ai-panel-title{font-size:13px;font-weight:700;color:var(--purple);margin-bottom:6px;display:flex;align-items:center;gap:6px}
-.ai-panel-sub{font-size:12px;color:#6D28D9;margin-bottom:10px;line-height:1.6}
-.ai-trigger-btn{display:flex;align-items:center;gap:7px;padding:9px 16px;border:none;border-radius:var(--radius-s);background:var(--purple);color:#fff;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;transition:opacity .2s}
+
+
 .ai-trigger-btn:active{opacity:.8}
-.ai-trigger-btn:disabled{background:#A78BFA;cursor:not-allowed}
-.ai-status{margin-top:10px;font-size:12px;display:none;align-items:center;gap:7px;color:var(--purple-d)}
+
+
 .ai-status.show{display:flex}
 .ai-spinner{width:14px;height:14px;border:2px solid #DDD6FE;border-top-color:var(--purple);border-radius:50%;animation:spin .6s linear infinite;flex-shrink:0}
 @keyframes spin{to{transform:rotate(360deg)}}
 
 /* 分析報告卡片 */
-.report-card{background:var(--surface);border:1px solid #DDD6FE;border-radius:var(--radius);padding:16px;margin-top:12px;display:none}
+
 .report-card.show{display:block}
-.report-section{margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--border)}
+
 .report-section:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0}
-.report-section-title{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--purple);margin-bottom:8px;display:flex;align-items:center;gap:5px}
+
 .report-text{font-size:13px;color:var(--text);line-height:1.75;white-space:pre-wrap}
 .score-chip{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:700;margin:2px}
 .score-high{background:var(--accent-l);color:var(--accent-t);border:1px solid #9FC9AA}
 .score-mid{background:var(--warn-l);color:var(--warn);border:1px solid #E8C380}
 .score-low{background:var(--danger-l);color:var(--danger);border:1px solid #E8A09A}
 .improve-item{display:flex;align-items:flex-start;gap:8px;padding:7px 10px;border-radius:var(--radius-s);margin-bottom:5px;font-size:12px;line-height:1.6}
-.improve-urgent{background:var(--danger-l);color:var(--danger)}
-.improve-suggest{background:var(--warn-l);color:var(--warn)}
-.improve-ok{background:var(--accent-l);color:var(--accent-t)}
+
+
+
 .report-verdict{padding:12px 14px;border-radius:var(--radius-s);font-size:13px;font-weight:700;text-align:center;margin-top:4px}
-.verdict-launch{background:var(--accent-l);color:var(--accent-t);border:1px solid #9FC9AA}
-.verdict-improve{background:var(--warn-l);color:var(--warn);border:1px solid #E8C380}
-.verdict-rework{background:var(--danger-l);color:var(--danger);border:1px solid #E8A09A}
+
+
+
 .report-meta{font-size:10px;color:var(--hint);margin-top:8px;text-align:right}
 .copy-report-btn{font-size:11px;padding:4px 10px;border:1px solid #DDD6FE;border-radius:var(--radius-s);background:#fff;cursor:pointer;color:var(--purple);font-family:inherit;margin-left:8px}
 
@@ -200,9 +200,9 @@ let S={
   dashView:'single',
   sessionId:null, sessionSetup:null,
   form:{page:0,name:'',dept:'',scores:{},notes:{},anomaly:null,overallLike:0,buyIntent:null,finalNote:''},
-  // 🐠 AI 分析狀態
-  aiReports:{},   // {sessId: reportHTML}
-  aiLoading:{},   // {sessId: bool}
+  // 🐠 小福數據複製狀態
+  aiReports:{},
+  aiLoading:{},
 };
 
 function loadPin(){/* 永遠以程式碼內密碼為準，不讀 localStorage */}
@@ -219,40 +219,9 @@ function headerTap(){
 // ══════════════════════════════════════════
 // 🐠 AI 分析核心
 // ══════════════════════════════════════════
-// Cloudflare Worker 中繼 URL（解決 CORS 問題）
-// 若有設定 Worker，AI 分析透過中繼呼叫；若無則直接呼叫（在 claude.ai 內可用）
-const CLAUDE_PROXY = localStorage.getItem('bfy_claude_proxy') || '';
 
-async function callClaude(system, user, maxTokens=1200){
-  const payload = {
-    model:'claude-sonnet-4-20250514',
-    max_tokens: maxTokens,
-    system,
-    messages:[{role:'user', content: user}]
-  };
+// [AI分析已移除，改用複製數據給小福]
 
-  let res;
-  if(CLAUDE_PROXY){
-    // 透過 Cloudflare Worker 中繼
-    res = await fetch(CLAUDE_PROXY+'/claude',{
-      method:'POST',
-      headers:{'Content-Type':'application/json','X-Api-Key':''},
-      body:JSON.stringify(payload)
-    });
-  } else {
-    // 直接呼叫（在 claude.ai Artifact 或 GitHub Pages 環境可用）
-    res = await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:{
-        'Content-Type':'application/json',
-        'anthropic-dangerous-direct-browser-access':'true'
-      },
-      body:JSON.stringify(payload)
-    });
-  }
-  const data = await res.json();
-  return (data.content||[]).map(c=>c.text||'').join('');
-}
 
 function calcAvgs(resp, allKeys){
   const avgs={};
@@ -263,209 +232,41 @@ function calcAvgs(resp, allKeys){
   return avgs;
 }
 
-async function runAIAnalysis(sid){
-  const sess = S.sessions[sid];
-  const resp = S.responses[sid]||[];
-  if(!sess || resp.length===0) return;
+// [AI分析已移除，改用複製數據給小福]
 
-  S.aiLoading[sid]=true;
-  render();
-
-  const allKeys=[...FIXED,...(sess.enabledTastes||[])];
-  const avgs = calcAvgs(resp, allKeys);
-  const n = resp.length;
-  const overall = resp.reduce((a,r)=>a+(r.overallLike||0),0)/n;
-  const buyPos = resp.filter(r=>['一定會買','可能會買'].includes(r.buyIntent)).length;
-  const buyNeg = resp.filter(r=>['可能不買','不會買'].includes(r.buyIntent)).length;
-  const anomalyN = resp.filter(r=>r.anomaly===true).length;
-
-  // 收集所有文字意見
-  const allNotes=[];
-  resp.forEach(r=>{
-    Object.entries(r.notes||{}).forEach(([k,v])=>{if(v)allNotes.push(`${k}：${v}`);});
-    if(r.finalNote) allNotes.push(`整體意見：${r.finalNote}`);
-  });
-
-  // 與前一次品評比較
-  const siblings = sessInCat(sess.catId)
-    .filter(([s])=>S.responses[s]&&S.responses[s].length>0&&s!==sid)
-    .sort((a,b)=>(a[1].roundNum||0)-(b[1].roundNum||0));
-  let prevCompare='（本次為首次品評，無前次比較）';
-  if(siblings.length>0){
-    const prevSid=siblings[siblings.length-1][0];
-    const prevSess=siblings[siblings.length-1][1];
-    const prevResp=S.responses[prevSid]||[];
-    const prevAvgs=calcAvgs(prevResp, allKeys);
-    const prevOverall=prevResp.reduce((a,r)=>a+(r.overallLike||0),0)/prevResp.length;
-    const diffs=allKeys.map(k=>{
-      const cur=avgs[k], prev=prevAvgs[k];
-      if(cur===null||prev===null)return null;
-      const d=cur-prev;
-      if(Math.abs(d)<0.1) return null;
-      return `${k}：${d>0?'+':''}${d.toFixed(2)}`;
-    }).filter(Boolean);
-    prevCompare=`前次（第${prevSess.roundNum}次）vs 本次：整體喜好 ${prevOverall.toFixed(1)}★→${overall.toFixed(1)}★\n各項變化：${diffs.length?diffs.join('、'):'各項分數相近，無明顯變化'}`;
-  }
-
-  const systemPrompt=`你是專業的食品研發品評分析師，擅長解讀品評數據並給出具體改善建議。
-請根據品評數據，用繁體中文產出一份完整的分析報告。
-
-報告必須包含以下 JSON 格式（只回傳 JSON，不要其他文字）：
-{
-  "summary": "2-3句整體總結",
-  "scores_analysis": "各項評分分析（指出最高分和最低分項目，說明可能原因）",
-  "buy_intent_analysis": "購買意願分析（正向率、負向率、主要原因推測）",
-  "notes_insights": "從填寫的文字意見中提煉出的關鍵洞察",
-  "improvements": [
-    {"level": "urgent/suggest/ok", "item": "改善項目名稱", "detail": "具體建議"},
-    ...最多5項
-  ],
-  "prev_comparison": "與前次品評相比的分析（若有）",
-  "verdict": "launch/improve/rework",
-  "verdict_reason": "建議的具體理由（2-3句）",
-  "next_steps": "下一步行動建議（具體可執行）"
-}
-
-verdict 的判斷標準：
-- launch：整體喜好≥4.0 且購買正向率≥60% 且無嚴重異味
-- improve：整體喜好3.0-4.0 或購買正向率40-60%，需調整後重測
-- rework：整體喜好<3.0 或購買正向率<40% 或有嚴重異味問題`;
-
-  const userMsg=`品評資訊：
-品評名稱：${sess.name}
-分類：${sess.catName||''}（第${sess.roundNum}次）
-品評日期：${sess.evalDate||'未填'}
-品評人數：${n} 人
-
-整體數據：
-- 整體喜好均分：${overall.toFixed(2)} / 5★
-- 購買意願正向（一定+可能會買）：${buyPos} 人（${Math.round(buyPos/n*100)}%）
-- 購買意願負向（可能不買+不會買）：${buyNeg} 人（${Math.round(buyNeg/n*100)}%）
-- 反映有異味：${anomalyN} 人
-
-各項評分（均分/5）：
-${allKeys.map(k=>avgs[k]!==null?`- ${k}：${avgs[k].toFixed(2)}`:null).filter(Boolean).join('\n')}
-
-購買意願分佈：
-${['一定會買','可能會買','猶豫中','可能不買','不會買'].map(v=>{
-  const c=resp.filter(r=>r.buyIntent===v).length;
-  return `- ${v}：${c} 人（${Math.round(c/n*100)}%）`;
-}).join('\n')}
-
-文字意見（共 ${allNotes.length} 條）：
-${allNotes.slice(0,20).join('\n')||'（無文字意見）'}
-
-與前次比較：
-${prevCompare}`;
-
-  try{
-    const raw = await callClaude(systemPrompt, userMsg, 1500);
-    const clean = raw.replace(/```json|```/g,'').trim();
-    const report = JSON.parse(clean);
-    S.aiReports[sid]=report;
-
-    // 同步存回 Firebase（可選）
-    try{
-      await fbPatch(`ai_reports/${sid}`,{
-        ...report,
-        generatedAt: new Date().toISOString(),
-        sessName: sess.name,
-        n
-      });
-    }catch(e){}
-
-  }catch(e){
-    S.aiReports[sid]={error:'分析失敗：'+e.message};
-    console.error('AI analysis error:', e);
-  }
-  S.aiLoading[sid]=false;
-  render();
-}
 
 // 渲染 AI 分析面板（嵌入 dashboard）
 function renderAIPanel(sid){
-  const loading = S.aiLoading[sid];
-  const report = S.aiReports[sid];
+  // 改為：複製數據給小福（不需要 API Key）
   const resp = S.responses[sid]||[];
   if(resp.length===0) return '';
-
-  let reportHTML='';
-  if(report && !report.error){
-    const verdictClass = {launch:'verdict-launch',improve:'verdict-improve',rework:'verdict-rework'}[report.verdict]||'verdict-improve';
-    const verdictLabel = {launch:'✅ 建議可量產上市',improve:'🔄 建議調整後重測',rework:'⚠️ 建議重新開發'}[report.verdict]||'待確認';
-    const improveLevels = {urgent:'improve-urgent',suggest:'improve-suggest',ok:'improve-ok'};
-    const improveIcons = {urgent:'🔴',suggest:'🟡',ok:'🟢'};
-
-    reportHTML=`
-      <div class="report-card show">
-        <div class="report-section">
-          <div class="report-section-title">📊 整體總結</div>
-          <div class="report-text">${escH(report.summary||'')}</div>
-        </div>
-        <div class="report-section">
-          <div class="report-section-title">📈 評分分析</div>
-          <div class="report-text">${escH(report.scores_analysis||'')}</div>
-        </div>
-        <div class="report-section">
-          <div class="report-section-title">🛒 購買意願分析</div>
-          <div class="report-text">${escH(report.buy_intent_analysis||'')}</div>
-        </div>
-        ${report.notes_insights?`
-        <div class="report-section">
-          <div class="report-section-title">💬 意見洞察</div>
-          <div class="report-text">${escH(report.notes_insights)}</div>
-        </div>`:''}
-        <div class="report-section">
-          <div class="report-section-title">🔧 改善建議</div>
-          ${(report.improvements||[]).map(im=>`
-            <div class="improve-item ${improveLevels[im.level]||'improve-suggest'}">
-              <span>${improveIcons[im.level]||'🟡'}</span>
-              <div><strong>${escH(im.item||'')}</strong>：${escH(im.detail||'')}</div>
-            </div>`).join('')}
-        </div>
-        ${report.prev_comparison && !report.prev_comparison.includes('首次')?`
-        <div class="report-section">
-          <div class="report-section-title">🔀 與前次比較</div>
-          <div class="report-text">${escH(report.prev_comparison)}</div>
-        </div>`:''}
-        <div class="report-section">
-          <div class="report-section-title">🎯 綜合建議</div>
-          <div class="report-verdict ${verdictClass}">${verdictLabel}</div>
-          <div class="report-text" style="margin-top:8px">${escH(report.verdict_reason||'')}</div>
-        </div>
-        <div class="report-section">
-          <div class="report-section-title">📋 下一步行動</div>
-          <div class="report-text">${escH(report.next_steps||'')}</div>
-        </div>
-        <div class="report-meta">
-          🐠 小福分析 · ${new Date().toLocaleDateString('zh-TW')}
-          <button class="copy-report-btn" onclick="copyReport('${sid}')">複製報告</button>
-        </div>
-      </div>`;
-  }else if(report && report.error){
-    reportHTML=`<div class="report-card show" style="border-color:var(--danger-l)">
-      <div style="font-size:12px;color:var(--danger)">❌ ${escH(report.error)}</div>
-    </div>`;
-  }
+  const sess = S.sessions[sid];
+  if(!sess) return '';
 
   return `
-    <div class="ai-panel">
-      <div class="ai-panel-title">🐠 小福 AI 品評分析</div>
-      <div class="ai-panel-sub">小福會讀取所有回應資料，自動分析評分模式、購買意願、文字意見，並與前次品評比較，產出具體改善建議。</div>
-      <button class="ai-trigger-btn" onclick="runAIAnalysis('${sid}')" ${loading?'disabled':''}>
-        ${loading?'<div style="width:14px;height:14px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite"></div>':'🐠'}
-        ${loading?'小福分析中...':'一鍵分析品評結果'}
+    <div style="background:var(--purple-l);border:1.5px solid #DDD6FE;border-radius:12px;padding:16px;margin:16px 0">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+        <span style="font-size:20px">🐠</span>
+        <div>
+          <div style="font-size:14px;font-weight:700;color:#6D28D9">小福 AI 品評分析</div>
+          <div style="font-size:12px;color:#7C3AED;margin-top:2px">複製數據到 claude.ai，搭配提示詞包免費分析</div>
+        </div>
+      </div>
+      <div style="background:rgba(109,40,217,.07);border-radius:8px;padding:10px 12px;font-size:12px;color:#6D28D9;margin-bottom:12px;line-height:1.7">
+        📋 <strong>使用方式：</strong><br>
+        ① 點下方按鈕複製品評數據<br>
+        ② 開啟 claude.ai → 上傳「貝特福優_品評分析提示詞包.md」<br>
+        ③ 貼上數據 → 小福自動產出完整分析報告
+      </div>
+      <button onclick="copyDataForXiaofu('${sid}')"
+        style="width:100%;padding:11px;border:none;border-radius:8px;background:#6D28D9;color:#fff;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px">
+        📋 複製品評數據給小福
       </button>
-      ${loading?`<div class="ai-status show"><div class="ai-spinner"></div><span>正在分析 ${resp.length} 份品評數據...</span></div>`:''}
-      ${reportHTML}
+      <div id="copy-status-${sid}" style="text-align:center;font-size:12px;color:#6D28D9;margin-top:8px;min-height:16px"></div>
     </div>`;
 }
 
-function copyReport(sid){
-  const r=S.aiReports[sid]; if(!r||r.error) return;
-  const txt=`品評分析報告\n\n整體總結：${r.summary}\n\n評分分析：${r.scores_analysis}\n\n購買意願：${r.buy_intent_analysis}\n\n改善建議：\n${(r.improvements||[]).map(im=>`• [${im.level}] ${im.item}：${im.detail}`).join('\n')}\n\n綜合建議：${r.verdict_reason}\n\n下一步：${r.next_steps}`;
-  navigator.clipboard.writeText(txt).then(()=>alert('✓ 報告已複製到剪貼簿'));
-}
+
 
 // ── 原有功能保留 ──
 async function loadAll(){
@@ -733,6 +534,34 @@ function renderList(){
       <div class="card">
         <div class="field"><label>PIN 碼</label><div class="pwd-wrap"><input type="password" id="global-pin" value="${S.adminPin}" style="max-width:150px"><button type="button" class="eye-btn eye-btn-dark" onclick="togglePwd('global-pin',this)" title="顯示/隱藏密碼">👁</button></div></div>
         <button class="btn btn-s btn-sm" onclick="const el=document.getElementById('global-pin');if(el&&el.value){S.adminPin=el.value;savePin();alert('PIN 已更新');}">儲存 PIN</button>
+        </div>
+        <div class="slabel" style="margin-top:16px">🐠 Claude API Key（小福 AI 分析必要）</div>
+        <div class="srow">
+          <div class="field" style="flex:1">
+            <label>API Key</label>
+            <div style="position:relative">
+              <input type="password" id="api-key-inp"
+                value="${localStorage.getItem('bfy_api_key')||''}"
+                placeholder="sk-ant-api03-..."
+                style="width:100%;padding-right:40px;font-family:monospace;font-size:12px">
+              <button type="button" class="eye-btn eye-btn-dark" onclick="togglePwd('api-key-inp',this)" title="顯示/隱藏">👁</button>
+            </div>
+          </div>
+        </div>
+        <div style="font-size:11px;color:var(--muted);margin:4px 0 8px">
+          前往 console.anthropic.com → API Keys → 建立新 Key → 貼上
+        </div>
+        <button class="btn btn-s btn-sm" onclick="
+          const el=document.getElementById('api-key-inp');
+          if(el&&el.value.trim()){
+            localStorage.setItem('bfy_api_key',el.value.trim());
+            alert('✅ API Key 已儲存！現在可以使用小福 AI 分析。');
+          } else {
+            localStorage.removeItem('bfy_api_key');
+            alert('API Key 已清除');
+          }
+        ">儲存 API Key</button>
+        <div style="display:none">
       </div>
     </div>`;
 }
@@ -783,7 +612,12 @@ function renderEditSess(){
 
 function renderForm(){
   const cfg=S.sessionSetup;
-  if(!cfg)return`<div class="empty">載入中...<br><span style="font-size:13px">請確認網路連線</span></div>`;
+  if(!cfg)return`<div class="empty" style="padding:40px 20px;text-align:center">
+    <div style="font-size:32px;margin-bottom:12px">🔍</div>
+    <div style="font-size:15px;font-weight:600;color:#374151;margin-bottom:8px">找不到品評資料</div>
+    <div style="font-size:13px;color:#6B7280;margin-bottom:20px">請確認 QR Code 連結正確，或請主辦人重新提供連結</div>
+    <button onclick="location.href=location.pathname" style="padding:10px 20px;border:none;border-radius:8px;background:#1F3864;color:#fff;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer">返回首頁</button>
+  </div>`;
   const pages=getPages(),p=S.form.page,isLast=p===pages.length-1;
   let body='';
   if(p===0){
@@ -1046,10 +880,10 @@ function exportTrendSummary(catId){
 
 function updateHeader(){
   const cfg=S.sessionSetup;
-  if(S.adminOK){document.getElementById('h-title').textContent='品評表單系統';document.getElementById('h-sub').textContent='管理員模式 🐠 小福分析已啟用';}
+  if(S.adminOK){document.getElementById('h-title').textContent='品評表單系統';document.getElementById('h-sub').textContent='管理員模式 · 🐠 小福';}
   else if(S.tab==='login'){document.getElementById('h-title').textContent='品評表單系統';document.getElementById('h-sub').textContent='管理員後台';}
   else if(cfg){document.getElementById('h-title').textContent=cfg.name||'品評表單';document.getElementById('h-sub').textContent=cfg.catName?(cfg.catName+(cfg.roundNum?' · 第'+cfg.roundNum+'次':'')):'歡迎參與品評';}
-  else{document.getElementById('h-title').textContent='品評表單';document.getElementById('h-sub').textContent='載入中...';}
+  else{document.getElementById('h-title').textContent='品評表單系統';document.getElementById('h-sub').textContent='貝特福優 · 研發部';}
 }
 
 function render(){
@@ -1085,16 +919,30 @@ function render(){
 }
 
 async function init(){
-  loadPin();
-  const sid=getSid();
-  if(sid){
-    S.sessionId=sid;S.tab='form';
-    render();
-    loadSessionSetup(sid);
-  }else{
-    S.tab='login';render();
+  try{
+    loadPin();
+    const sid=getSid();
+    if(sid){
+      S.sessionId=sid;S.tab='form';
+      render();
+      loadSessionSetup(sid);
+    }else{
+      S.tab='login';render();
+    }
+    loadAll().then(()=>{if(S.adminOK)render();}).catch(e=>{
+      console.error('loadAll error:',e);
+      S.tab='login';render();
+    });
+  }catch(e){
+    console.error('init error:',e);
+    // 強制顯示登入頁
+    S.tab='login';
+    try{render();}catch(e2){
+      document.getElementById('content').innerHTML=
+        '<div style="padding:40px;text-align:center"><div style="font-size:24px;margin-bottom:12px">⚠️</div><div style="font-weight:600">系統載入失敗</div><div style="font-size:12px;color:#999;margin-top:8px">'+e.message+'</div><br><button onclick="location.reload()" style="padding:8px 16px;background:#1F3864;color:#fff;border:none;border-radius:6px;cursor:pointer">重新載入</button></div>';
+      document.getElementById('h-sub').textContent='載入失敗，請重新整理';
+    }
   }
-  loadAll().then(()=>{if(S.adminOK)render();});
 }
 init();
 
@@ -1105,6 +953,82 @@ function togglePwd(inputId, btn){
   if(el.type==='password'){el.type='text';btn.textContent='🙈';}
   else{el.type='password';btn.textContent='👁';}
 }
+
+// 🐠 複製品評數據給小福（claude.ai 分析用）
+function copyDataForXiaofu(sid){
+  const sess = S.sessions[sid];
+  const resp = S.responses[sid]||[];
+  if(!sess||resp.length===0) return;
+
+  const n = resp.length;
+
+  // 計算各項均分
+  const allKeys = [...new Set(resp.flatMap(r=>Object.keys(r.scores||{})))];
+  const avgs = {};
+  allKeys.forEach(k=>{
+    const vals = resp.map(r=>(r.scores||{})[k]).filter(v=>v&&v>0);
+    avgs[k] = vals.length ? (vals.reduce((a,b)=>a+b,0)/vals.length) : null;
+  });
+
+  // 整體喜好
+  const overallKey = allKeys.find(k=>k.includes('整體')||k.includes('overall')) || allKeys[allKeys.length-1];
+  const overall = avgs[overallKey] || 0;
+
+  // 購買意願
+  const buyOpts = ['一定會買','可能會買','可能不買','不會買'];
+  const buyCounts = {};
+  buyOpts.forEach(o=>{ buyCounts[o]=resp.filter(r=>r.buyIntent===o).length; });
+  const buyPos = (buyCounts['一定會買']||0)+(buyCounts['可能會買']||0);
+  const buyNeg = (buyCounts['可能不買']||0)+(buyCounts['不會買']||0);
+
+  // 異味
+  const anomalyN = resp.filter(r=>r.anomaly===true||r.anomaly==='true'||r.anomaly===1).length;
+
+  // 文字意見
+  const notes = resp.map((r,i)=>{
+    const note = r.finalNote||r.notes||'';
+    return note ? `- 品評者${i+1}：「${note}」` : null;
+  }).filter(Boolean);
+
+  // 評分列表
+  const scoreLines = allKeys.map(k=>avgs[k]!==null?`- ${k}：${avgs[k].toFixed(2)}`:'').filter(Boolean);
+
+  // 購買分佈
+  const buyLines = buyOpts.map(o=>`- ${o}：${buyCounts[o]||0} 人`);
+
+  const text = `品評名稱：${sess.name}
+分類：${sess.catName||''}（第${sess.roundNum||1}次）
+品評日期：${sess.evalDate||'未填'}
+品評人數：${n} 人
+
+整體數據：
+- 整體喜好均分：${overall.toFixed(2)} / 5★
+- 購買意願正向（一定+可能會買）：${buyPos} 人（${Math.round(buyPos/n*100)}%）
+- 購買意願負向（可能不買+不會買）：${buyNeg} 人（${Math.round(buyNeg/n*100)}%）
+- 反映有異味：${anomalyN} 人
+
+各項評分（均分/5）：
+${scoreLines.join('\n')}
+
+購買意願分佈：
+${buyLines.join('\n')}
+
+品評者文字意見：
+${notes.length>0?notes.join('\n'):'（無文字意見）'}`;
+
+  navigator.clipboard.writeText(text).then(()=>{
+    const el = document.getElementById('copy-status-'+sid);
+    if(el){
+      el.innerHTML = '✅ 已複製！請到 claude.ai 上傳提示詞包後貼上';
+      el.style.color = '#2A5C3F';
+      setTimeout(()=>{el.innerHTML='';el.style.color='#6D28D9';}, 5000);
+    }
+  }).catch(()=>{
+    const el = document.getElementById('copy-status-'+sid);
+    if(el){ el.innerHTML = '❌ 複製失敗，請手動複製'; el.style.color='#C0392B'; }
+  });
+}
+
 </script>
 </body>
 </html>
