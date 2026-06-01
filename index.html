@@ -150,6 +150,18 @@ body{font-family:'Noto Sans TC',sans-serif;background:var(--bg);color:var(--text
 .verdict-rework{background:var(--danger-l);color:var(--danger);border:1px solid #E8A09A}
 .report-meta{font-size:10px;color:var(--hint);margin-top:8px;text-align:right}
 .copy-report-btn{font-size:11px;padding:4px 10px;border:1px solid #DDD6FE;border-radius:var(--radius-s);background:#fff;cursor:pointer;color:var(--purple);font-family:inherit;margin-left:8px}
+
+.eye-btn{
+  position:absolute;right:10px;top:50%;transform:translateY(-50%);
+  background:none;border:none;cursor:pointer;font-size:16px;
+  color:rgba(255,255,255,.5);padding:4px;line-height:1;
+  transition:color .15s;
+}
+.eye-btn:hover{color:rgba(255,255,255,.9);}
+.eye-btn-dark{color:var(--muted);}
+.eye-btn-dark:hover{color:var(--navy);}
+.pwd-wrap{position:relative;display:flex;align-items:center;}
+.pwd-wrap input{flex:1;padding-right:36px !important;}
 </style>
 </head>
 <body>
@@ -231,7 +243,10 @@ async function callClaude(system, user, maxTokens=1200){
     // 直接呼叫（在 claude.ai Artifact 或 GitHub Pages 環境可用）
     res = await fetch('https://api.anthropic.com/v1/messages',{
       method:'POST',
-      headers:{'Content-Type':'application/json'},
+      headers:{
+        'Content-Type':'application/json',
+        'anthropic-dangerous-direct-browser-access':'true'
+      },
       body:JSON.stringify(payload)
     });
   }
@@ -638,8 +653,8 @@ function renderLogin(){
     <div style="width:64px;height:64px;background:var(--accent-l);border-radius:50%;margin:0 auto 16px;display:flex;align-items:center;justify-content:center"><span style="font-size:28px">🏷️</span></div>
     <div style="font-size:18px;font-weight:700;margin-bottom:4px">品評表單系統</div>
     <div style="font-size:13px;color:var(--muted);margin-bottom:32px">請輸入管理員 PIN 碼進入後台</div>
-    <input type="password" id="adm-pin" placeholder="••••" maxlength="8" onkeydown="if(event.key==='Enter')verifyAdmin()"
-      style="width:180px;display:block;margin:0 auto 10px;padding:14px;text-align:center;font-size:22px;letter-spacing:.3em;border:1px solid var(--border);border-radius:var(--radius-s);font-family:inherit;background:var(--bg)">
+    <div class="pwd-wrap"><input type="password" id="adm-pin" placeholder="••••" maxlength="8" onkeydown="if(event.key==='Enter')verifyAdmin()"
+      style="width:180px;display:block;margin:0 auto 10px;padding:14px;text-align:center;font-size:22px;letter-spacing:.3em;border:1px solid var(--border);border-radius:var(--radius-s);font-family:inherit;background:var(--bg)"><button type="button" class="eye-btn eye-btn-dark" onclick="togglePwd('adm-pin',this)" title="顯示/隱藏密碼">👁</button></div>
     ${S.adminErr?`<div style="font-size:12px;color:var(--danger);margin-bottom:8px">PIN 碼錯誤，請再試一次</div>`:''}
     <button class="btn btn-p" onclick="verifyAdmin()" style="width:180px;margin:0 auto">進入後台</button>
     <div style="margin-top:32px;padding-top:20px;border-top:1px solid var(--border)">
@@ -716,7 +731,7 @@ function renderList(){
     <div style="margin-top:16px;padding-top:14px;border-top:1px solid var(--border)">
       <div class="slabel">管理員 PIN 碼</div>
       <div class="card">
-        <div class="field"><label>PIN 碼</label><input type="password" id="global-pin" value="${S.adminPin}" style="max-width:150px"></div>
+        <div class="field"><label>PIN 碼</label><div class="pwd-wrap"><input type="password" id="global-pin" value="${S.adminPin}" style="max-width:150px"><button type="button" class="eye-btn eye-btn-dark" onclick="togglePwd('global-pin',this)" title="顯示/隱藏密碼">👁</button></div></div>
         <button class="btn btn-s btn-sm" onclick="const el=document.getElementById('global-pin');if(el&&el.value){S.adminPin=el.value;savePin();alert('PIN 已更新');}">儲存 PIN</button>
       </div>
     </div>`;
@@ -953,7 +968,7 @@ function renderDashboard(){
         <div style="font-size:14px;font-weight:700;margin-bottom:3px">${sess.name}</div>
         ${cat?`<div style="margin-bottom:14px"><span class="tag-cat" style="background:${color}22;color:${color}">${cat.name}${sess.roundNum?' · 第'+sess.roundNum+'次':''}</span></div>`:''}
         <div style="font-size:13px;color:var(--muted);margin-bottom:14px">請輸入管理員 PIN 碼</div>
-        <input type="password" id="pin-inp" placeholder="••••" maxlength="8" onkeydown="if(event.key==='Enter')verifyDashPin()" class="pin-input" style="width:150px;display:block;margin:0 auto 10px">
+        <div class="pwd-wrap"><input type="password" id="pin-inp" placeholder="••••" maxlength="8" onkeydown="if(event.key==='Enter')verifyDashPin()" class="pin-input" style="width:150px;display:block;margin:0 auto 10px"><button type="button" class="eye-btn eye-btn-dark" onclick="togglePwd('pin-inp',this)" title="顯示/隱藏密碼">👁</button></div>
         ${S.pinErr?`<div class="pin-error">PIN 碼錯誤</div>`:''}
         <button class="btn btn-p" onclick="verifyDashPin()" style="width:150px;margin:0 auto">確認</button>
       </div>`;
@@ -1082,6 +1097,14 @@ async function init(){
   loadAll().then(()=>{if(S.adminOK)render();});
 }
 init();
+
+// ── 顯示/隱藏密碼 ──
+function togglePwd(inputId, btn){
+  const el=document.getElementById(inputId);
+  if(!el)return;
+  if(el.type==='password'){el.type='text';btn.textContent='🙈';}
+  else{el.type='password';btn.textContent='👁';}
+}
 </script>
 </body>
 </html>
